@@ -27,7 +27,7 @@ const Home = () => {
                         grocery.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -39,7 +39,7 @@ const Home = () => {
                         bakery.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -51,7 +51,7 @@ const Home = () => {
                         beverages.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -63,7 +63,7 @@ const Home = () => {
                         dairy.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -75,7 +75,7 @@ const Home = () => {
                         snacks.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -87,7 +87,7 @@ const Home = () => {
                         fruitsnvegetables.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -99,7 +99,7 @@ const Home = () => {
                         meatnseafood.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -111,7 +111,7 @@ const Home = () => {
                         frozenfoods.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -123,7 +123,7 @@ const Home = () => {
                         personalcare.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }
@@ -135,7 +135,7 @@ const Home = () => {
                         householdessentials.data?.map((p) => ({
                             slug: p.slug,
                             title: p.name,
-                            image: p.mainImage,
+                            image: p.mainImage ?? "",
                             price: p.sellingPrice
                         })) || []
                     }

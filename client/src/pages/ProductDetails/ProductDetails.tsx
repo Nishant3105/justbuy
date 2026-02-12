@@ -11,16 +11,13 @@ import "swiper/css/navigation";
 
 const ProductDetails = () => {
   const { slug } = useParams<{ slug: string }>();
-  // console.log("🟡 slug from params:", slug);
-  const { data, isLoading, isError } = useProductDetails(slug);
+  const { data, isLoading, isError } = useProductDetails(slug ?? "");
 
   const { addToCart } = useCart();
   const { showToast } = useToast();
 
   if (isLoading) return <div>Loading...</div>;
   if (isError) return <div>Product not found</div>;
-
-  // console.log("fetched data..", data);
 
   return (
     <div className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -56,10 +53,10 @@ const ProductDetails = () => {
             e.stopPropagation();
             addToCart(
               {
-                slug: data?.slug,
-                title: data?.name,
-                image: data?.mainImage,
-                price: data?.sellingPrice,
+                slug: data?.slug ?? '',
+                title: data?.name ?? '',
+                image: data?.mainImage?? '',
+                price: data?.sellingPrice ?? 0,
                 quantity: 1,
               },
               showToast

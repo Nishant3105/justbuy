@@ -1,5 +1,5 @@
 export interface Product {
-  _id: string | number;
+  _id: string;
   name: string;
   sku: string;
   slug: string;
@@ -22,8 +22,6 @@ export interface Product {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
-
-  // ADMIN / INTERNAL fields
   vendorId?: string;
   createdBy?: string;
   updatedBy?: string;

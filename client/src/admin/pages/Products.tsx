@@ -185,7 +185,7 @@ const Products = () => {
                     <td className="px-4 py-3 text-right">
                       <button onClick={() => handleEdit(product)} className="mr-3 text-blue-600 hover:underline">Edit</button>
                       <button
-                        onClick={() => deleteProduct(product._id)}
+                        onClick={() => deleteProduct(product?._id)}
                         className="text-red-600 hover:underline"
                       >
                         Delete
