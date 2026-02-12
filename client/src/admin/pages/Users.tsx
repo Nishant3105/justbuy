@@ -50,7 +50,6 @@ interface User {
     updatedAt: string;
 }
 
-/* ===================== MOCK DATA ===================== */
 
 const initialUsers: User[] = [
     {
@@ -75,7 +74,6 @@ const initialUsers: User[] = [
     },
 ];
 
-/* ===================== MAIN ===================== */
 
 const Users = () => {
     const [users, setUsers] = useState<User[]>(initialUsers);
@@ -102,14 +100,14 @@ const Users = () => {
         );
     }
 
-    if (selectedUser) {
-        return (
-            <UserOrders
-                user={selectedUser}
-                onBack={() => setSelectedUser(null)}
-            />
-        );
-    }
+    // if (selectedUser) {
+    //     return (
+    //         // <UserOrders
+    //         //     user={selectedUser}
+    //         //     onBack={() => setSelectedUser(null)}
+    //         // />
+    //     );
+    // }
 
 
     return (

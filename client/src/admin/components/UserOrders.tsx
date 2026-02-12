@@ -1,12 +1,11 @@
-import { type Order } from "../../types/Order";
-import { type User } from "../../types/User";
+import type { Order } from "../../types/Order";
+import type { User } from "../../types/User";
 
 interface UserOrdersProps {
   user: User;
   onBack: () => void;
 }
 
-/* Mock data – replace with API later */
 const mockOrders: Order[] = [
   {
     id: "1",
@@ -53,8 +52,7 @@ const UserOrders = ({ user, onBack }: UserOrdersProps) => {
           ← Back to Users
         </button>
       </div>
-
-      {/* Orders Table */}
+      
       <div className="overflow-x-auto rounded-xl bg-white shadow">
         <table className="w-full text-sm">
           <thead className="bg-gray-100">

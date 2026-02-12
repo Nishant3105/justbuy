@@ -8,7 +8,6 @@ interface AddProductFormProps {
     onSave: (updatedProduct: Product) => void;
 }
 
-// Extend Product for frontend-only file handling
 type ProductFormData = Omit<
     Product,
     "mainImage" | "detailImage" | "galleryImages"
@@ -18,10 +17,10 @@ type ProductFormData = Omit<
 };
 
 const TAX_MAP: Record<string, number> = {
-  gst_0: 0,
-  gst_5: 5,
-  gst_12: 12,
-  gst_18: 18,
+    gst_0: 0,
+    gst_5: 5,
+    gst_12: 12,
+    gst_18: 18,
 };
 
 
@@ -85,8 +84,6 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
         setFormData((prev) => {
             let updated = { ...prev };
 
-            /* ---------- SLUG LOGIC ---------- */
-
             if (name === "slug") {
                 setSlugEdited(true);
                 updated.slug = generateSlug(value);
@@ -98,15 +95,17 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
                 if (!slugEdited) {
                     updated.slug = generateSlug(value);
                 }
-            } else {
-                updated[name] = value;
+            } else if (name in updated) {
+                updated[name as keyof typeof updated] = value as never;
             }
-
-            /* ---------- PRICE CALCULATION ---------- */
 
             const mrp = Number(updated.mrp) || 0;
             const discount = Number(updated.discount) || 0;
-            const taxPercent = TAX_MAP[updated.taxClass] || 0;
+            const taxPercent =
+                updated.taxClass && updated.taxClass in TAX_MAP
+                    ? TAX_MAP[updated.taxClass]
+                    : 0;
+
 
             if (mrp > 0) {
                 const discountedPrice = mrp - (mrp * discount) / 100;
@@ -125,8 +124,6 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
 
 
 
-
-    // Main image
     const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0] || null;
         setFormData((prev) => ({
@@ -135,7 +132,6 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
         }));
     };
 
-    // Gallery images
     const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files ? Array.from(e.target.files) : [];
         setFormData((prev) => ({
@@ -144,14 +140,12 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
         }));
     };
 
-    // Submit (IMPORTANT PART)
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
             const fd = new FormData();
 
-            // Append non-file fields
             Object.entries(formData).forEach(([key, value]) => {
                 if (
                     value === undefined ||
@@ -167,12 +161,10 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
                 fd.append(key, String(value));
             });
 
-            // Main image (single)
             if (formData.mainImage instanceof File) {
                 fd.append("mainImage", formData.mainImage);
             }
 
-            // Gallery images (multiple)
             if (Array.isArray(formData.galleryImages)) {
                 formData.galleryImages.forEach((file) => {
                     if (file instanceof File) {
@@ -184,16 +176,14 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
             let res;
 
             if (formData._id) {
-                // ✅ EDIT → PATCH
                 res = await axios.patch(
                     `http://localhost:5000/api/product/${formData._id}`,
                     fd,
                     {
-                        withCredentials: true, // cookies (access + refresh)
+                        withCredentials: true,
                     }
                 );
             } else {
-                // ✅ ADD → POST
                 res = await axios.post(
                     "http://localhost:5000/api/product",
                     fd,
