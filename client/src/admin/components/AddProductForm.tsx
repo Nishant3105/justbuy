@@ -177,7 +177,7 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
 
             if (formData._id) {
                 res = await axios.patch(
-                    `http://localhost:5000/api/product/${formData._id}`,
+                    `https://justbuy-a2g2.onrender.com/api/product/${formData._id}`,
                     fd,
                     {
                         withCredentials: true,
@@ -185,7 +185,7 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
                 );
             } else {
                 res = await axios.post(
-                    "http://localhost:5000/api/product",
+                    "https://justbuy-a2g2.onrender.com/api/product",
                     fd,
                     {
                         withCredentials: true,

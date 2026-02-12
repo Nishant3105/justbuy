@@ -1,7 +1,7 @@
 import axios from "axios";
 import { Product } from "../types/Product";
 
-const API_URL = "http://localhost:5000/api/product";
+const API_URL = "https://justbuy-a2g2.onrender.com/api/product";
 
 export const fetchProductsByCategory = async (
   category: string,

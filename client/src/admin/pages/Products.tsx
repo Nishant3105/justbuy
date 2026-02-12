@@ -83,7 +83,7 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/product",
+          "https://justbuy-a2g2.onrender.com/api/product",
           {
             withCredentials: true,
           }
@@ -104,7 +104,7 @@ const Products = () => {
 
     try {
       await axios.delete(
-        `http://localhost:5000/api/product/${id}`,
+        `https://justbuy-a2g2.onrender.com/api/product/${id}`,
         { withCredentials: true }
       );
 
