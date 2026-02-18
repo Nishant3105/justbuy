@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import "swiper/css";
@@ -8,6 +9,7 @@ import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext"
 
 type Product = {
+    _id: string,
     slug: string;
     title: string;
     image: string;
@@ -18,9 +20,10 @@ type Props = {
     products: Product[];
     title: string;
     loading?: boolean;
+    categorySlug?: string;
 };
 
-const ProductCategories: React.FC<Props> = ({ products, title, loading }) => {
+const ProductCategories: React.FC<Props> = ({ products, title, loading, categorySlug }) => {
     const navigate = useNavigate();
     const { addToCart } = useCart();
     const { showToast } = useToast();
@@ -35,12 +38,22 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading }) => {
     }
 
     if (!products.length) {
-        return null; // or "No products found"
+        return null;
     }
 
     return (
         <div className="p-5">
-            <h3 className="text-xl md:text-2xl font-semibold mb-6 text-center">{title}</h3>
+            <div className="relative mb-4">
+                <h3 className="text-xl md:text-2xl font-semibold text-center">{title}</h3>
+                {categorySlug && (
+                    <Link
+                        to={`/categories/${categorySlug.toLowerCase().replace(/ & /g, "-")}`}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 text-blue-600 hover:underline font-medium"
+                    >
+                        View All
+                    </Link>
+                )}
+            </div>
 
             <Swiper
                 modules={[Navigation]}
@@ -58,19 +71,18 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading }) => {
                             onClick={() => navigate(`/product/${product.slug}`)}
                             className="relative cursor-pointer rounded-xl overflow-hidden shadow-md hover:shadow-lg transition group"
                         >
-                            {/* Image */}
                             <img
                                 src={product.image}
                                 className="h-48 max-w-full object-contain transition-transform duration-500 group-hover:scale-110"
                                 alt={product.title}
                             />
 
-                            {/* Add to Cart Icon */}
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     addToCart(
                                         {
+                                            id: product._id,
                                             slug: product.slug,
                                             title: product.title,
                                             image: product.image,
@@ -86,7 +98,6 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading }) => {
                                 <FaCartPlus size={16} />
                             </button>
 
-                            {/* Title */}
                             <div className="p-3">
                                 <h3 className="font-semibold text-sm">{product.title}</h3>
                                 <p className="text-green-600 font-bold mt-1">

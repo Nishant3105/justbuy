@@ -38,19 +38,15 @@ const ProductsTable = () => {
                         },
                     ].map((product, index) => (
                         <tr key={index} className="border-t">
-                            {/* Product Name + Brand */}
+
                             <td className="px-4 py-3 font-medium">{product.name}</td>
 
-                            {/* SKU */}
                             <td className="px-4 py-3 text-gray-600">{product.sku}</td>
 
-                            {/* Category */}
                             <td className="px-4 py-3">{product.category}</td>
 
-                            {/* Price */}
                             <td className="px-4 py-3">₹{product.price}</td>
 
-                            {/* Stock */}
                             <td className="px-4 py-3">
                                 <span
                                     className={`rounded-full px-2 py-1 text-xs ${product.stock < 10
@@ -62,21 +58,18 @@ const ProductsTable = () => {
                                 </span>
                             </td>
 
-                            {/* Status */}
                             <td className="px-4 py-3">
                                 <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
                                     {product.status}
                                 </span>
                             </td>
 
-                            {/* Visibility */}
                             <td className="px-4 py-3">
                                 <span className="rounded-full bg-blue-100 px-2 py-1 text-xs text-blue-700">
                                     {product.visibility}
                                 </span>
                             </td>
 
-                            {/* Main Image */}
                             <td className="px-3 py-3">
                                 <img
                                     src="/auth.jpg"
@@ -85,7 +78,6 @@ const ProductsTable = () => {
                                 />
                             </td>
 
-                            {/* Actions */}
                             <td className="px-4 py-3 text-right">
                                 <button className="mr-3 text-blue-600 hover:underline">
                                     Edit

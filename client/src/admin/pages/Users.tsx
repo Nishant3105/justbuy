@@ -1,8 +1,6 @@
 import { useState } from "react";
 import UserOrders from "../components/UserOrders";
 
-/* ===================== TYPES ===================== */
-
 type UserRole = "admin" | "staff" | "customer" | "vendor";
 type UserStatus = "active" | "blocked" | "pending";
 
@@ -187,7 +185,6 @@ const Users = () => {
     );
 };
 
-/* ===================== FORM ===================== */
 
 interface UserFormProps {
     initialData: User;
@@ -217,7 +214,6 @@ const UserForm = ({ initialData, onCancel, onSave }: UserFormProps) => {
         <form className="space-y-6" onSubmit={handleSubmit}>
             <h2 className="text-xl font-semibold">User Details</h2>
 
-            {/* Identity */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} className="border px-4 py-2 rounded" />
                 <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} className="border px-4 py-2 rounded" />
@@ -225,7 +221,6 @@ const UserForm = ({ initialData, onCancel, onSave }: UserFormProps) => {
                 <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} className="border px-4 py-2 rounded" />
             </div>
 
-            {/* Role & Status */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <select name="role" value={formData.role} onChange={handleChange} className="border px-4 py-2 rounded">
                     <option value="admin">Admin</option>
@@ -241,27 +236,23 @@ const UserForm = ({ initialData, onCancel, onSave }: UserFormProps) => {
                 </select>
             </div>
 
-            {/* Security */}
             <div className="flex gap-6">
                 <label><input type="checkbox" name="emailVerified" checked={formData.emailVerified} onChange={handleChange} /> Email Verified</label>
                 <label><input type="checkbox" name="phoneVerified" checked={formData.phoneVerified} onChange={handleChange} /> Phone Verified</label>
                 <label><input type="checkbox" name="twoFactorEnabled" checked={formData.twoFactorEnabled} onChange={handleChange} /> 2FA Enabled</label>
             </div>
 
-            {/* Preferences */}
             <div className="flex gap-6">
                 <label><input type="checkbox" name="newsletterSubscribed" checked={formData.newsletterSubscribed} onChange={handleChange} /> Newsletter</label>
                 <label><input type="checkbox" name="marketingConsent" checked={formData.marketingConsent} onChange={handleChange} /> Marketing Consent</label>
             </div>
 
-            {/* Read-only stats */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3 text-sm text-gray-600">
                 <div>Total Orders: {formData.totalOrders}</div>
                 <div>Total Spent: ₹{formData.totalSpent}</div>
                 <div>Last Login: {formData.lastLoginAt ?? "—"}</div>
             </div>
 
-            {/* Actions */}
             <div className="flex justify-end gap-3">
                 <button type="button" onClick={onCancel} className="border px-4 py-2 rounded">
                     Cancel

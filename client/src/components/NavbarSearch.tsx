@@ -16,6 +16,21 @@ export default function NavbarSearch() {
     setOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+  const handleClickOutside = (e: any) => {
+    if (boxRef.current && !boxRef.current.contains(e.target)) {
+      setOpen(false);
+    }
+  };
+
+  document.addEventListener("click", handleClickOutside);
+
+  return () => {
+    document.removeEventListener("click", handleClickOutside);
+  };
+}, []);
+
+
   return (
     <div ref={boxRef} className="relative w-full max-w-md">
       <input
@@ -24,58 +39,79 @@ export default function NavbarSearch() {
           setQuery(e.target.value);
           setOpen(true);
         }}
+        onFocus={() => setOpen(true)}
         placeholder="Search products…"
-        className=" w-full
-                    h-10
-                    px-4
-                    border
-                    border-gray-300
-                    rounded-lg
-                    bg-white
-                    text-gray-900
-                    outline-none
-                    focus:ring-2
-                    focus:ring-blue-500
-                  "
-
+        className="
+      w-full h-10 px-4
+      border border-gray-300
+      rounded-lg
+      bg-white text-gray-900
+      outline-none
+      focus:ring-2 focus:ring-blue-500
+      transition-all duration-300 ease-in-out
+      focus:shadow-lg
+    "
         onKeyDown={e => {
           if (e.key === "Enter") {
             navigate(`/search?q=${query}`);
+            setOpen(false);
           }
         }}
       />
 
-      {/* Dropdown */}
-      {open && query.length >= 2 && (
-        <div className="absolute top-full mt-2 w-full bg-white shadow-lg rounded-lg z-50">
-          {isFetching && (
-            <div className="p-4 text-sm text-gray-500">Searching…</div>
-          )}
+      <div
+        className={`
+      absolute top-full mt-2 w-full bg-white shadow-lg rounded-lg z-50
+      transform transition-all duration-200 ease-out origin-top
+      ${open && query.length >= 2
+            ? "opacity-100 scale-y-100 translate-y-0"
+            : "opacity-0 scale-y-95 -translate-y-2 pointer-events-none"
+          }
+    `}
+      >
 
-          {data?.length === 0 && !isFetching && (
-            <div className="p-4 text-sm text-gray-500">
-              No results found
-            </div>
-          )}
+        {isFetching && (
+          <div className="p-4 text-sm text-gray-500 animate-pulse">
+            Searching…
+          </div>
+        )}
 
-          {data?.map((item: any) => (
-            <div
-              key={item._id}
-              onClick={() => {
-                navigate(`/product/${item.slug}`);
-                setOpen(false);
-              }}
-              className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-            >
-              {/* <img
-                src={item.thumbnail}
-                className="w-10 h-10 object-contain"
-              /> */}
-              <span className="text-sm text-gray-500">{item.name}</span>
-            </div>
-          ))}
-        </div>
-      )}
+        {data?.length === 0 && !isFetching && (
+          <div className="p-4 text-sm text-gray-500">
+            No results found
+          </div>
+        )}
+
+        {data?.map((item: any) => (
+          <div
+            key={item._id}
+            onClick={() => {
+              navigate(`/product/${item.slug}`);
+              setOpen(false);
+            }}
+            className="
+          flex items-center gap-3 px-4 py-2
+          hover:bg-blue-50
+          cursor-pointer
+          transition-colors duration-150
+        "
+          >
+            {/* 
+        <img
+          src={item.thumbnail}
+          className="w-10 h-10 object-contain"
+        /> 
+        */}
+
+            <span className="text-sm text-gray-700">
+              {item.name}
+            </span>
+          </div>
+        ))}
+
+      </div>
+
     </div>
+
   );
 }

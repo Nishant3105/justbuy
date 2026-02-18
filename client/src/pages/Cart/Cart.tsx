@@ -1,6 +1,7 @@
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import { FaTrash } from "react-icons/fa";
+import axios from '../../utils/axios';
 
 const Cart = () => {
   const { cartItems, addToCart, removeFromCart, clearCart } = useCart();
@@ -22,12 +23,92 @@ const Cart = () => {
     );
   }
 
+  const handlePayment = async () => {
+    try {
+      const orderPayload = {
+        items: cartItems.map(item => ({
+          product: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        total: totalPrice
+      };
+      const { data: order } = await axios.post(
+        "/api/payment/create-order",
+        orderPayload,
+        { withCredentials: true }
+      );
+
+      console.log("ORDER:", order);
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+
+        amount: order.amount,
+        currency: order.currency,
+
+        name: "JustBuy",
+        description: "Test Payment",
+
+        order_id: order.razorpayOrderId,
+
+        handler: async function (response: any) {
+
+          console.log("PAYMENT SUCCESS:", response);
+
+          try {
+            await axios.post(
+              "/api/payment/verify-payment",
+              {
+                orderId: order.orderId, 
+
+                razorpay_payment_id: response.razorpay_payment_id,
+
+                razorpay_order_id: response.razorpay_order_id,
+
+                razorpay_signature: response.razorpay_signature,
+              },
+              { withCredentials: true }
+            );
+
+            alert("Payment verified successfully");
+
+          } catch (err) {
+
+            console.error("VERIFY FAILED:", err);
+
+            alert("Payment verification failed");
+
+          }
+        },
+
+        prefill: {
+          name: "Test User",
+          email: "test@example.com",
+          contact: "9999999999",
+        },
+
+        theme: {
+          color: "#000000",
+        },
+      };
+
+      const razor = new (window as any).Razorpay(options);
+
+      razor.open();
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Cart Items */}
         <div className="md:col-span-2 space-y-4">
           {cartItems.map((item) => (
             <div
@@ -46,10 +127,9 @@ const Cart = () => {
                   ₹{item.price.toFixed(2)}
                 </p>
 
-                {/* Quantity Controls */}
                 <div className="flex items-center gap-3 mt-2">
                   <button
-                    onClick={() => removeFromCart(item.slug,false,showToast)}
+                    onClick={() => removeFromCart(item.slug, false, showToast)}
                     className="px-2 py-1 border rounded"
                   >
                     -
@@ -58,7 +138,7 @@ const Cart = () => {
                   <span>{item.quantity}</span>
 
                   <button
-                    onClick={() => addToCart(item,showToast)}
+                    onClick={() => addToCart(item, showToast)}
                     className="px-2 py-1 border rounded"
                   >
                     +
@@ -66,9 +146,8 @@ const Cart = () => {
                 </div>
               </div>
 
-              {/* Remove */}
               <button
-                onClick={() => removeFromCart(item.slug,true,showToast)}
+                onClick={() => removeFromCart(item.slug, true, showToast)}
                 className="text-red-500 hover:text-red-700"
               >
                 <FaTrash />
@@ -77,7 +156,6 @@ const Cart = () => {
           ))}
         </div>
 
-        {/* Summary */}
         <div className="bg-white p-4 rounded-lg shadow h-fit">
           <h2 className="font-semibold text-lg mb-4">Order Summary</h2>
 
@@ -86,8 +164,8 @@ const Cart = () => {
             <span className="font-semibold">₹{totalPrice.toFixed(2)}</span>
           </div>
 
-          <button className="w-full bg-black text-white py-2 rounded mt-4 hover:bg-gray-800">
-            Checkout
+          <button className="w-full bg-black text-white py-2 rounded mt-4 hover:bg-gray-800" onClick={handlePayment}>
+            Pay Now
           </button>
 
           <button

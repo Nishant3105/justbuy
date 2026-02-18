@@ -16,7 +16,6 @@ const Navbar = () => {
   const [openMenu, setOpenMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -30,7 +29,6 @@ const Navbar = () => {
   return (
     <header className="bg-gray-800 text-white w-full">
       <div className="max-w-7xl mx-auto px-4 h-16 grid grid-cols-[auto_1fr_auto] items-center gap-4">
-        {/* Logo */}
         <div className="flex items-center gap-2" onClick={() => navigate(`/`)}>
           <img src="/logo.png" className="h-8" />
           <span className="font-semibold">JustBuy</span>
@@ -42,7 +40,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Nav + Cart + Auth */}
         <div className="flex items-center gap-6">
           {/* <nav className="flex gap-6">
             <NavLink
@@ -68,7 +65,6 @@ const Navbar = () => {
             </NavLink>
           </nav> */}
 
-          {/* Cart Icon */}
           <button
             onClick={() => navigate("/cart")}
             className="relative hover:text-yellow-300 transition"
@@ -82,16 +78,14 @@ const Navbar = () => {
             )}
           </button>
 
-          {/* Auth / User Menu */}
           {user ? (
             <div className="relative" ref={menuRef}>
               <button
                 onClick={() => setOpenMenu((prev) => !prev)}
                 className="flex items-center gap-2 rounded-full bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
               >
-                {/* Circle Profile Pic */}
                 <img
-                  src={user?.profilePic || "/auth.jpg"} // default avatar if no profile pic
+                  src={user?.profilePic || "/auth.jpg"} 
                   alt="Profile"
                   className="h-8 w-8 rounded-full object-cover"
                 />
@@ -103,9 +97,15 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-2 w-40 rounded-md bg-white shadow-lg border border-gray-200 z-50">
                   <button
                     className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                    onClick={() => alert("Go to profile")}
+                    onClick={() => {navigate("/profile");setOpenMenu((prev) => !prev)}}
                   >
                     Profile
+                  </button>
+                  <button
+                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
+                    onClick={() => {navigate("/my-orders");setOpenMenu((prev) => !prev)}}
+                  >
+                    My Orders
                   </button>
                   <button
                     className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"

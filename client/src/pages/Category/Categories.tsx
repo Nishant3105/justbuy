@@ -17,8 +17,6 @@ const CategoryPage = () => {
     category?.name || ""
   );
 
-  console.log("fetched category...",data)
-
   useEffect(() => {
     if (!category) {
       navigate("/categories/grocery", { replace: true });

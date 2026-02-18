@@ -1,79 +1,14 @@
-// src/admin/pages/Products.tsx
 import { useState, useEffect } from "react";
 import type { Product } from "../../types/Product";
 import AddProductForm from "../components/AddProductForm";
-import axios from "axios";
+import axios from "../../utils/axios"; 
 
-// const initialProducts: Product[] = [
-//   {
-//     _id: "1",
-//     name: "Milk",
-//     sku: "MILK001",
-//     slug: "milk",
-//     brand: "DairyBest",
-//     category: "Grocery",
-//     subCategory: "Dairy",
-//     mrp: 120,
-//     sellingPrice: 100,
-//     discount: 10,
-//     taxClass: "gst_5",
-//     stockQty: 50,
-//     lowStockThreshold: 5,
-//     stockStatus: "in_stock",
-//     status: "active",
-//     visibility: "public",
-//     description: "Fresh milk from local farms",
-//     metaTitle: "Buy Milk Online",
-//     metaKeywords: "milk, dairy, fresh milk",
-//     metaDescription: "Purchase fresh milk online from DairyBest.",
-//     mainImage: "/auth.jpg",
-//     detailImage: "/auth.jpg",
-//     galleryImages: ["/auth.jpg", "/auth.jpg"],
-//     vendorId: "V001",
-//     createdBy: "admin",
-//     updatedBy: "admin",
-//     createdAt: new Date().toISOString(),
-//     updatedAt: new Date().toISOString(),
-//   },
-//   {
-//     _id: "2",
-//     name: "Bread",
-//     sku: "BREAD001",
-//     slug: "bread",
-//     brand: "BakeHouse",
-//     category: "Bakery",
-//     subCategory: "Bread",
-//     mrp: 50,
-//     sellingPrice: 45,
-//     discount: 5,
-//     taxClass: "gst_5",
-//     stockQty: 30,
-//     lowStockThreshold: 3,
-//     stockStatus: "in_stock",
-//     status: "active",
-//     visibility: "public",
-//     description: "Freshly baked bread",
-//     metaTitle: "Buy Bread Online",
-//     metaKeywords: "bread, bakery, fresh bread",
-//     metaDescription: "Order fresh bread online from BakeHouse.",
-//     mainImage: "/auth.jpg",
-//     detailImage: "/auth.jpg",
-//     galleryImages: ["/auth.jpg", "/auth.jpg"],
-//     vendorId: "V002",
-//     createdBy: "admin",
-//     updatedBy: "admin",
-//     createdAt: new Date().toISOString(),
-//     updatedAt: new Date().toISOString(),
-//   },
-// ];
 
 const Products = () => {
-  // const [products, setProducts] = useState<Product[]>(initialProducts);
   const [products, setProducts] = useState<Product[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showForm, setShowForm] = useState(false);
 
-  // When Cancel is clicked
   const handleCancel = () => {
     setEditingProduct(null);
     setShowForm(false);
@@ -83,7 +18,7 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(
-          "https://justbuy-a2g2.onrender.com/api/product",
+          "/api/product",
           {
             withCredentials: true,
           }
@@ -104,7 +39,7 @@ const Products = () => {
 
     try {
       await axios.delete(
-        `https://justbuy-a2g2.onrender.com/api/product/${id}`,
+        `/api/product/${id}`,
         { withCredentials: true }
       );
 
@@ -115,7 +50,6 @@ const Products = () => {
   };
 
 
-  // Edit button clicked
   const handleSave = (product: Product) => {
     if (editingProduct) {
       setProducts(products.map((p) =>

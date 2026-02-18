@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
 export type CartItem = {
-  // id: string;
+  id: string,
   slug: string;
   title: string;
   image: string;

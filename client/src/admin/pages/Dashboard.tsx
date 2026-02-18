@@ -1,10 +1,8 @@
-// src/admin/pages/Dashboard.tsx
 const Dashboard = () => {
   return (
     <div>
       <h1 className="mb-6 text-2xl font-semibold">Dashboard</h1>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl bg-white p-6 shadow">
           <p className="text-sm text-gray-500">Total Users</p>
@@ -27,7 +25,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Recent Activity */}
       <div className="mt-10 rounded-xl bg-white p-6 shadow">
         <h2 className="mb-4 text-lg font-semibold">Recent Activity</h2>
         <ul className="space-y-3 text-sm text-gray-600">

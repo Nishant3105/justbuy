@@ -16,6 +16,9 @@ export interface Product {
   mainImage?: string;
   detailImage?: string;
   galleryImages?: string[];
+  sold?: number;        
+  revenue?: number;     
+  lastSoldAt?: string; 
   status?: "active" | "draft" | "disabled";
   visibility?: "public" | "private";
   description?: string;

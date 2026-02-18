@@ -1,6 +1,13 @@
-import axios from "axios";
-import { useState } from "react";
+import axios from "../../utils/axios";
+import { useState, useEffect } from "react";
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit';
+import Bold from '@tiptap/extension-bold';
+import Italic from '@tiptap/extension-italic';
+import Link from '@tiptap/extension-link';
+import Heading from '@tiptap/extension-heading';
 import type { Product } from "../../types/Product";
+import RichTextEditor from "./RichTextEditor"
 
 interface AddProductFormProps {
     initialData?: Product;
@@ -122,6 +129,18 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
         });
     };
 
+    const editor = useEditor({
+        extensions: [StarterKit, Bold, Italic, Link, Heading],
+        content: formData.description,
+        onUpdate: ({ editor }) => {
+            setFormData(prev => ({ ...prev, description: editor.getHTML() }))
+        }
+    })
+
+    useEffect(() => {
+        return () => editor?.destroy();
+    }, [editor]);
+
 
 
     const handleMainImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -177,7 +196,7 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
 
             if (formData._id) {
                 res = await axios.patch(
-                    `https://justbuy-a2g2.onrender.com/api/product/${formData._id}`,
+                    `/api/product/${formData._id}`,
                     fd,
                     {
                         withCredentials: true,
@@ -185,7 +204,7 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
                 );
             } else {
                 res = await axios.post(
-                    "https://justbuy-a2g2.onrender.com/api/product",
+                    "/api/product",
                     fd,
                     {
                         withCredentials: true,
@@ -512,14 +531,12 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
                 {/* Description */}
                 <div className="flex flex-col gap-1">
                     <label className="text-sm font-medium text-gray-700">Product Description</label>
-                    <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border px-4 py-2"
-                        rows={4}
+                    <RichTextEditor
+                        content={formData.description ?? ''}
+                        onChange={(html) => setFormData({ ...formData, description: html })}
                     />
                 </div>
+
 
                 {/* SEO */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

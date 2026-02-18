@@ -1,9 +1,9 @@
-import axios from "axios"; 
+import axios from "../utils/axios"
 
 export const searchProducts = async (query: string) => {
   if (!query || query.length < 2) return [];
 
-  const response = await axios.get("https://justbuy-a2g2.onrender.com/api/product/search", {
+  const response = await axios.get("/api/product/search", {
     params: { q: query },
   });
 

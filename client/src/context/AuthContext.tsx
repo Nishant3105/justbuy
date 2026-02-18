@@ -1,14 +1,17 @@
-// src/context/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from "react";
-import axios from "../utils/axios"; // axios with withCredentials=true
+import axios from "../utils/axios"; 
 
-interface User {
+export interface User {
   _id: string;
   email: string;
-  role: "admin" | "customer" | "staff" | "vendor";
-  profilePic?: string,
-  firstName?: string,
-  lastName?: string,
+  role: "admin" | "customer" | "staff";
+  profilePic?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  addresses?: any[];
+  newsletterSubscribed?: boolean;
+  marketingConsent?: boolean;
 }
 
 interface AuthContextType {
@@ -24,26 +27,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-    useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get("/auth/me");
-        setUser(res.data.user);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchUser();
-  }, []);
-
-  // 🔁 Check auth on app load
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get("/api/auth/me");
+        const res = await axios.get("/api/auth/me", { withCredentials: true });
         setUser(res.data.user);
       } catch {
         setUser(null);
@@ -56,18 +44,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await axios.post("/api/auth/login", { email, password });
-    console.log(res.data.user);
+    const res = await axios.post("/api/auth/login", { email, password }, { withCredentials: true });
     setUser(res.data.user);
   };
 
   const logout = async () => {
-    await axios.get("/api/auth/logout");
+    await axios.get("/api/auth/logout", { withCredentials: true });
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, setUser  }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

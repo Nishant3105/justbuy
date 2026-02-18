@@ -1,4 +1,3 @@
-// src/admin/admin.routes.tsx
 import AdminRoute from "./routes/AdminRoutes";
 import AdminLayout from "./components/AdminLayout";
 import Dashboard from "./pages/Dashboard";
