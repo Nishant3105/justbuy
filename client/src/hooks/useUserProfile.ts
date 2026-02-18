@@ -22,7 +22,7 @@ export const useUserProfile = () => {
     queryFn: fetchUserProfile,
   });
 
-  const mutation = useMutation<UserProfile, unknown, UserProfile>({
+  const { mutate: updateProfile, isPending: updateLoading, isError: updateError } = useMutation<UserProfile, unknown, UserProfile>({
     mutationFn: patchUserProfile,
     onSuccess: (updatedUser) => {
       queryClient.setQueryData(["userProfile"], updatedUser);
@@ -34,9 +34,9 @@ export const useUserProfile = () => {
     isLoading,
     isError,
     refetch,
-    updateProfile: mutation.mutate,
-    updateLoading: mutation.isLoading,
-    updateError: mutation.isError,
+    updateProfile,
+    updateLoading,
+    updateError,
   };
 };
 
