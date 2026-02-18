@@ -9,7 +9,7 @@ const upload = require("../middleware/upload.middleware");
 // console.log("requireRole:", requireRole);
 // console.log("requireRole result:", requireRole(["admin"]));
 
-router.get("/search",async (req, res) => {
+router.get("/search", async (req, res) => {
   const { q } = req.query;
 
   console.log("reached here..")
@@ -126,29 +126,29 @@ router.post(
     let mainImageUrl = null;
     let galleryUrls = [];
 
-if (req.files?.mainImage?.[0]) {
-  const optimized = await optimizeImage(req.files.mainImage[0].buffer);
+    if (req.files?.mainImage?.[0]) {
+      const optimized = await optimizeImage(req.files.mainImage[0].buffer);
 
-  mainImageUrl = await uploadImage({
-    buffer: optimized.buffer,
-    contentType: optimized.contentType,
-    folder: "products/main",
-  });
-}
-
-if (req.files?.galleryImages?.length) {
-  for (const file of req.files.galleryImages) {
-    const optimized = await optimizeImage(file.buffer);
-
-    galleryUrls.push(
-      await uploadImage({
+      mainImageUrl = await uploadImage({
         buffer: optimized.buffer,
         contentType: optimized.contentType,
-        folder: "products/gallery",
-      })
-    );
-  }
-}
+        folder: "products/main",
+      });
+    }
+
+    if (req.files?.galleryImages?.length) {
+      for (const file of req.files.galleryImages) {
+        const optimized = await optimizeImage(file.buffer);
+
+        galleryUrls.push(
+          await uploadImage({
+            buffer: optimized.buffer,
+            contentType: optimized.contentType,
+            folder: "products/gallery",
+          })
+        );
+      }
+    }
 
 
     delete req.body._id
@@ -157,6 +157,9 @@ if (req.files?.galleryImages?.length) {
       ...req.body,
       mainImage: mainImageUrl,
       galleryImages: galleryUrls,
+      sold: 0,
+      revenue: 0,
+      lastSoldAt: null,
       createdBy: req.user.id,
     });
 
@@ -180,17 +183,16 @@ router.patch(
     const { optimizeImage } = require("../utils/imageProcessor");
     const { uploadImage, deleteImage } = require("../utils/r2Upload");
 
-    /* ---------- Images ---------- */
     if (req.files?.mainImage?.[0]) {
       if (product.mainImage) await deleteImage(product.mainImage);
 
-const optimized = await optimizeImage(req.files.mainImage[0].buffer);
+      const optimized = await optimizeImage(req.files.mainImage[0].buffer);
 
-product.mainImage = await uploadImage({
-  buffer: optimized.buffer,
-  contentType: optimized.contentType,
-  folder: "products/main",
-});
+      product.mainImage = await uploadImage({
+        buffer: optimized.buffer,
+        contentType: optimized.contentType,
+        folder: "products/main",
+      });
 
     }
 
@@ -213,16 +215,19 @@ product.mainImage = await uploadImage({
       }
     }
 
-    /* ---------- Fields ---------- */
     const updates = { ...req.body };
     delete updates._id;
     delete updates.createdBy;
 
     Object.keys(updates).forEach((k) => {
-      if (updates[k] === "") delete updates[k];
+      if (updates[k] !== "") {
+        if (["stockQty", "sold", "revenue"].includes(k)) {
+          updates[k] = Number(updates[k]);
+        }
+        product[k] = updates[k];
+      }
     });
 
-    Object.assign(product, updates);
     await product.save();
 
     res.json(product);

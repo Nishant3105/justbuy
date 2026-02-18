@@ -8,6 +8,7 @@ router.post("/refresh", authController.refreshToken);
 router.get("/logout", authController.logout);
 router.post("/google", authController.googleAuthController);
 router.post("/profile", protect, authController.refreshToken);
-router.get("/me", authController.me);
+router.get("/me", protect,authController.me);
+router.patch("/me", protect, authController.updateProfile);
 
 module.exports = router;

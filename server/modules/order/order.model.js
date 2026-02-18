@@ -2,25 +2,63 @@ const mongoose = require("mongoose");
 
 const OrderSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
     items: [
       {
-        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-        name: String,
-        price: Number,
-        qty: Number,
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+
+        quantity: {
+          type: Number,
+          required: true,
+          min: 1,
+        },
+
+        price: {
+          type: Number,
+          required: true,
+          min: 0,
+        },
       },
     ],
 
-    subtotal: Number,
-    tax: Number,
-    shipping: Number,
-    total: Number,
+    total: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    // Razorpay fields
+    razorpayOrderId: {
+      type: String,
+    },
+
+    razorpayPaymentId: {
+      type: String,
+    },
+
+    razorpaySignature: {
+      type: String,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["razorpay", "cod"],
+      default: "razorpay",
+    },
 
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "failed", "refunded"],
+      default: "pending",
     },
 
     orderStatus: {
@@ -33,9 +71,11 @@ const OrderSchema = new mongoose.Schema(
         "delivered",
         "cancelled",
       ],
+      default: "pending",
     },
 
-    shippingAddress: Object,
+    paidAt: Date,
+    deliveredAt: Date,
   },
   { timestamps: true }
 );

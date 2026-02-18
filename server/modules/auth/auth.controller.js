@@ -52,6 +52,45 @@ exports.me = async (req, res, next) => {
   }
 };
 
+exports.updateProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.id; 
+    const updateData = req.body;
+
+    console.log("fetched user",userId)
+
+    const allowedFields = [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "addresses",
+      "newsletterSubscribed",
+      "marketingConsent",
+    ];
+
+    const filteredData = {};
+    allowedFields.forEach((field) => {
+      if (updateData[field] !== undefined) filteredData[field] = updateData[field];
+    });
+
+    const updatedUser = await User.findByIdAndUpdate(userId, filteredData, {
+      new: true,
+      runValidators: true,
+      select: "-password",
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ user: updatedUser });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to update profile" });
+  }
+};
+
 
 
 

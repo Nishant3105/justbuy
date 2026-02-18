@@ -16,10 +16,10 @@ const ProductSchema = new mongoose.Schema(
 
     stockQty: Number,
     lowStockThreshold: Number,
-    stockStatus: String,
+    stockStatus: { type: String, enum: ["in_stock", "out_of_stock"] },
 
-    status: String,
-    visibility: String,
+    status:{ type: String, enum: ["active", "draft", "disabled"] },
+    visibility: { type: String, enum: ["public", "private"] },
 
     description: String,
 
@@ -31,7 +31,12 @@ const ProductSchema = new mongoose.Schema(
     metaKeywords: String,
     metaDescription: String,
 
+    sold: { type: Number, default: 0 },           
+    revenue: { type: Number, default: 0 },        
+    lastSoldAt: { type: Date },
+
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
   },
   { timestamps: true }
 );

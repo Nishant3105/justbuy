@@ -8,7 +8,6 @@ exports.protect = async (req, res, next) => {
     return res.status(401).json({ message: "Not authenticated" });
   }
 
-  // 1️⃣ Try access token
   if (accessToken) {
     try {
       const decoded = jwt.verify(
@@ -21,7 +20,6 @@ exports.protect = async (req, res, next) => {
         role: decoded.role,
       };
 
-      // (optional) mirror on res
       res.user = req.user;
 
       return next();
@@ -29,11 +27,9 @@ exports.protect = async (req, res, next) => {
       if (err.name !== "TokenExpiredError") {
         return res.status(401).json({ message: "Invalid token" });
       }
-      // else → try refresh token
     }
   }
 
-  // 2️⃣ Access expired → no refresh
   if (!refreshToken) {
     return res.status(401).json({ message: "Session expired" });
   }
@@ -44,7 +40,6 @@ exports.protect = async (req, res, next) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    // 3️⃣ Create new access token
     const newAccessToken = jwt.sign(
       {
         id: decodedRefresh.id,
@@ -54,11 +49,10 @@ exports.protect = async (req, res, next) => {
       { expiresIn: "15m" }
     );
 
-    // 4️⃣ Set new access token cookie
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false, // true in prod with HTTPS
+      secure: false, 
       maxAge: 15 * 60 * 1000,
     });
 
@@ -67,7 +61,6 @@ exports.protect = async (req, res, next) => {
       role: decodedRefresh.role,
     };
 
-    // (optional) mirror
     res.user = req.user;
 
     next();
