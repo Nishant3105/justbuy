@@ -1,121 +1,140 @@
-import type { Order } from "../../types/Order";
-import type { User } from "../../types/User";
+import { useParams } from "react-router-dom";
+import { useUsersOrders } from "../../hooks/useOrders";
 
-interface UserOrdersProps {
-  user: User;
-  onBack: () => void;
-}
+const UserOrders = () => {
+  const { userId } = useParams();
+  const { data: orders, isLoading, isError } = useUsersOrders(userId!);
 
-const mockOrders: Order[] = [
-  {
-    id: "1",
-    orderNumber: "#ORD1001",
-    userId: "1",
-    date: "2024-02-12",
-    itemsCount: 3,
-    paymentStatus: "paid",
-    orderStatus: "delivered",
-    totalAmount: 1299,
-  },
-  {
-    id: "2",
-    orderNumber: "#ORD1002",
-    userId: "1",
-    date: "2024-02-20",
-    itemsCount: 1,
-    paymentStatus: "pending",
-    orderStatus: "placed",
-    totalAmount: 499,
-  },
-];
+  if (isLoading) return <div>Loading your orders...</div>;
+  if (isError) return <div>Failed to load orders.</div>;
 
-const UserOrders = ({ user, onBack }: UserOrdersProps) => {
-  const orders = mockOrders.filter(
-    (order) => order.userId === user.id
-  );
+return (
+  <div className="max-w-6xl mx-auto px-6 py-8">
 
-  return (
-    <div>
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">
-            Orders – {user.firstName} {user.lastName}
-          </h1>
-          <p className="text-sm text-gray-500">{user.email}</p>
-        </div>
+    {/* Header */}
+    <div className="flex items-center justify-between mb-8">
+      <h1 className="text-3xl font-bold text-gray-900">My Orders</h1>
 
-        <button
-          onClick={onBack}
-          className="rounded-lg border px-4 py-2"
-        >
-          ← Back to Users
-        </button>
-      </div>
-      
-      <div className="overflow-x-auto rounded-xl bg-white shadow">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-3">Order ID</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Items</th>
-              <th className="px-4 py-3">Payment</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3 text-right">Total</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {orders.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={6}
-                  className="px-4 py-6 text-center text-gray-500"
-                >
-                  No orders found for this user
-                </td>
-              </tr>
-            ) : (
-              orders.map((order) => (
-                <tr key={order.id} className="border-t">
-                  <td className="px-4 py-3 font-medium">
-                    {order.orderNumber}
-                  </td>
-
-                  <td className="px-4 py-3">{order.date}</td>
-
-                  <td className="px-4 py-3">{order.itemsCount}</td>
-
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs ${
-                        order.paymentStatus === "paid"
-                          ? "bg-green-100 text-green-700"
-                          : order.paymentStatus === "pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {order.paymentStatus}
-                    </span>
-                  </td>
-
-                  <td className="px-4 py-3 capitalize">
-                    {order.orderStatus}
-                  </td>
-
-                  <td className="px-4 py-3 text-right font-semibold">
-                    ₹{order.totalAmount}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <span className="text-sm text-gray-500">
+        {orders?.length || 0} orders
+      </span>
     </div>
-  );
+
+    {/* Empty state */}
+    {orders?.length === 0 && (
+      <div className="bg-white border border-gray-200 rounded-2xl p-12 text-center shadow-sm">
+        <div className="text-gray-400 text-lg mb-2">📦</div>
+        <p className="text-gray-600 font-medium">No orders yet</p>
+        <p className="text-gray-400 text-sm mt-1">
+          Your orders will appear here once you purchase something.
+        </p>
+      </div>
+    )}
+
+    {/* Orders list */}
+    <div className="space-y-6">
+      {orders?.map((order: any) => (
+        <div
+          key={order?._id}
+          className="bg-white border border-gray-200 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200"
+        >
+
+          {/* Order header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-6 py-4 border-b border-gray-100 bg-gray-50 rounded-t-2xl">
+
+            <div className="flex flex-col">
+              <span className="text-sm text-gray-500">Order ID</span>
+              <span className="font-semibold text-gray-800">
+                {order?._id}
+              </span>
+            </div>
+
+            <div className="flex flex-col md:items-end">
+              <span className="text-sm text-gray-500">Placed on</span>
+              <span className="font-medium text-gray-700">
+                {new Date(order?.createdAt).toLocaleDateString()}
+              </span>
+            </div>
+
+          </div>
+
+          {/* Items */}
+          <div className="p-6 space-y-4">
+            {order?.items?.map((item: any, idx: number) => (
+              <div
+                key={idx}
+                className="flex items-center gap-4 border border-gray-100 rounded-xl p-3 hover:bg-gray-50 transition"
+              >
+
+                {/* Product image */}
+                <div className="w-16 h-16 flex-shrink-0">
+                  {item.product.mainImage ? (
+                    <img
+                      src={item.product.mainImage}
+                      alt={item.product.name}
+                      className="w-full h-full object-cover rounded-lg border"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-xs">
+                      No image
+                    </div>
+                  )}
+                </div>
+
+                {/* Product details */}
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-800">
+                    {item.product.name}
+                  </p>
+
+                  <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                    <span>Qty: {item.quantity}</span>
+                    <span>₹{item.price}</span>
+                  </div>
+                </div>
+
+                {/* Item total */}
+                <div className="font-semibold text-gray-800">
+                  ₹{item.quantity * item.price}
+                </div>
+
+              </div>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+
+            {/* Total */}
+            <div>
+              <span className="text-sm text-gray-500">Total Amount</span>
+              <div className="text-lg font-bold text-gray-900">
+                ₹{order?.total}
+              </div>
+            </div>
+
+            {/* Status */}
+            <span
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold ${
+                order.paymentStatus === "paid"
+                  ? "bg-green-100 text-green-700"
+                  : order.paymentStatus === "failed"
+                  ? "bg-red-100 text-red-700"
+                  : "bg-yellow-100 text-yellow-700"
+              }`}
+            >
+              {order.paymentStatus.toUpperCase()}
+            </span>
+
+          </div>
+
+        </div>
+      ))}
+    </div>
+
+  </div>
+);
+
 };
 
 export default UserOrders;

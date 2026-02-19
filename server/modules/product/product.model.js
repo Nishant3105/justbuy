@@ -41,4 +41,10 @@ const ProductSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+ProductSchema.index({ createdAt: -1 }); 
+ProductSchema.index({ category: 1 });   
+ProductSchema.index({ sold: -1 });      
+ProductSchema.index({ revenue: -1 });   
+ProductSchema.index({ status: 1 }); 
+
 module.exports = mongoose.model("Product", ProductSchema);

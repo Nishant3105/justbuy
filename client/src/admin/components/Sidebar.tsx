@@ -1,4 +1,3 @@
-// src/admin/components/Sidebar.tsx
 import { Link } from "react-router-dom";
 
 const Sidebar = () => {
@@ -15,6 +14,9 @@ const Sidebar = () => {
         </Link>
         <Link to="/admin/users" className="block rounded p-2 hover:bg-gray-100">
           Users
+        </Link>
+        <Link to="/admin/orders" className="block rounded p-2 hover:bg-gray-100">
+          Orders
         </Link>
       </nav>
     </aside>

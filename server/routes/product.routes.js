@@ -4,20 +4,65 @@ const requireAuth = require("../middleware/auth.middleware");
 const requireRole = require("../middleware/role.middleware");
 const upload = require("../middleware/upload.middleware");
 
+router.get("/filter", async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      sortBy = "createdAt",
+      order = "desc",
+      search,
+    } = req.query;
 
-// console.log("requireAuth:", requireAuth);
-// console.log("requireRole:", requireRole);
-// console.log("requireRole result:", requireRole(["admin"]));
+    const query = {};
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (search) {
+      query.name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    const sort = {
+      [sortBy]: order === "asc" ? 1 : -1,
+    };
+
+    const skip = (page - 1) * limit;
+
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(Number(limit)),
+
+      Product.countDocuments(query),
+    ]);
+
+    res.json({
+      products,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit),
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
 
 router.get("/search", async (req, res) => {
   const { q } = req.query;
-
-  console.log("reached here..")
-
   if (!q || q.length < 2) {
     return res.json([]);
   }
-
   const products = await Product.find({
     name: { $regex: q, $options: "i" },
   })
@@ -268,8 +313,59 @@ router.post("/test-upload", async (req, res) => {
   res.json({ key });
 });
 
+router.get("/filter", async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      category,
+      sortBy = "createdAt",
+      order = "desc",
+      search,
+    } = req.query;
 
+    const query = {};
 
+    if (category) {
+      query.category = category;
+    }
+
+    if (search) {
+      query.name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    const sort = {
+      [sortBy]: order === "asc" ? 1 : -1,
+    };
+
+    const skip = (page - 1) * limit;
+
+    const [products, total] = await Promise.all([
+      Product.find(query)
+        .sort(sort)
+        .skip(skip)
+        .limit(Number(limit)),
+
+      Product.countDocuments(query),
+    ]);
+
+    res.json({
+      products,
+      total,
+      page: Number(page),
+      pages: Math.ceil(total / limit),
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
 
 
 module.exports = router;

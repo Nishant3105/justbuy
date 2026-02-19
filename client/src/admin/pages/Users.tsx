@@ -1,96 +1,41 @@
 import { useState } from "react";
-import UserOrders from "../components/UserOrders";
-
-type UserRole = "admin" | "staff" | "customer" | "vendor";
-type UserStatus = "active" | "blocked" | "pending";
-
-interface Address {
-    id: string;
-    type: "billing" | "shipping";
-    fullName: string;
-    phone: string;
-    addressLine1: string;
-    addressLine2?: string;
-    city: string;
-    state: string;
-    country: string;
-    postalCode: string;
-    isDefault: boolean;
-}
-
-interface User {
-    id: string;
-
-    firstName: string;
-    lastName: string;
-    email: string;
-    phone: string;
-    avatar?: string;
-
-    role: UserRole;
-    status: UserStatus;
-
-    emailVerified: boolean;
-    phoneVerified: boolean;
-    twoFactorEnabled: boolean;
-    lastLoginAt?: string;
-    authProvider: "email",
-    addresses: Address[];
-
-    totalOrders: number;
-    totalSpent: number;
-    lastOrderDate?: string;
-
-    newsletterSubscribed: boolean;
-    marketingConsent: boolean;
-
-    createdAt: string;
-    updatedAt: string;
-}
-
-
-const initialUsers: User[] = [
-    {
-        id: "1",
-        firstName: "Nishant",
-        lastName: "Kumar",
-        email: "nishant@gmail.com",
-        phone: "9999999999",
-        role: "admin",
-        status: "active",
-        emailVerified: true,
-        phoneVerified: true,
-        twoFactorEnabled: false,
-        addresses: [],
-        authProvider: "email",
-        totalOrders: 12,
-        totalSpent: 5400,
-        newsletterSubscribed: true,
-        marketingConsent: true,
-        createdAt: "2024-01-01",
-        updatedAt: "2024-02-01",
-    },
-];
-
+import UserForm from "../components/UserForm";
+import { User, UserRole, useUsers, usePatchUser } from "../../hooks/useUsers";
+import { useAuth } from "../../context/AuthContext";
 
 const Users = () => {
-    const [users, setUsers] = useState<User[]>(initialUsers);
+    const { user: currentUser } = useAuth();
+    const { data: users = [], isLoading } = useUsers();
+    const patchUser = usePatchUser();
     const [editingUser, setEditingUser] = useState<User | null>(null);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
+
+    const filteredUsers =
+        roleFilter === "all"
+            ? users
+            : users.filter((u) => u.role === roleFilter);
+
+
 
     const handleSave = (user: User) => {
-        setUsers((prev) => {
-            const exists = prev.find((u) => u.id === user.id);
-            return exists
-                ? prev.map((u) => (u.id === user.id ? user : u))
-                : [...prev, user];
-        });
-        setEditingUser(null);
+        if (!user.id) {
+            patchUser.mutate(user as Partial<User> & { _id: string });
+            setEditingUser(null);
+        }
     };
+
+    // const handleDelete = (id: string) => {
+    //     if (window.confirm("Are you sure you want to delete this user?")) {
+    //         // patchUser.mutate({ id, status: "deleted" });
+    //     }
+    // };
+
+    if (isLoading) return <div>Loading users...</div>;
 
     if (editingUser) {
         return (
             <UserForm
+                currentUserRole={currentUser?.role || "customer"}
                 initialData={editingUser}
                 onCancel={() => setEditingUser(null)}
                 onSave={handleSave}
@@ -98,82 +43,143 @@ const Users = () => {
         );
     }
 
-    // if (selectedUser) {
-    //     return (
-    //         // <UserOrders
-    //         //     user={selectedUser}
-    //         //     onBack={() => setSelectedUser(null)}
-    //         // />
-    //     );
-    // }
-
-
     return (
         <div>
-            <div className="mb-6 flex items-center justify-between">
+            {/* <div className="mb-6 flex items-center justify-between"> */}
+            <div className="mb-6 mb-6 flex items-center justify-between">
                 <h1 className="text-2xl font-semibold">Users</h1>
-                <button
-                    onClick={() =>
-                        setEditingUser({
-                            id: crypto.randomUUID(),
-                            firstName: "",
-                            lastName: "",
-                            email: "",
-                            phone: "",
-                            role: "customer",
-                            status: "active",
-                            emailVerified: false,
-                            phoneVerified: false,
-                            twoFactorEnabled: false,
-                            authProvider: "email",
-                            addresses: [],
-                            totalOrders: 0,
-                            totalSpent: 0,
-                            newsletterSubscribed: false,
-                            marketingConsent: false,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString(),
-                        })
-                    }
-                    className="rounded-lg bg-black px-4 py-2 text-white"
-                >
-                    + Add User
-                </button>
+                {/* {currentUser?.role === "admin" && (
+                    <button
+                        onClick={() =>
+                            setEditingUser({
+                                id: crypto.randomUUID(),
+                                firstName: "",
+                                lastName: "",
+                                email: "",
+                                phone: "",
+                                role: "customer",
+                                status: "active",
+                                emailVerified: false,
+                                phoneVerified: false,
+                                twoFactorEnabled: false,
+                                addresses: [],
+                                totalOrders: 0,
+                                totalSpent: 0,
+                                newsletterSubscribed: false,
+                                marketingConsent: false,
+                                permissions: { read: false, edit: false },
+                                createdAt: new Date().toISOString(),
+                                updatedAt: new Date().toISOString(),
+                                authProvider: "email",
+                            })
+                        }
+                        className="rounded-lg bg-black px-4 py-2 text-white"
+                    >
+                        + Add User
+                    </button>
+                )} */}
+                <div className="mb-4 flex items-center gap-3">
+                    <label className="text-sm font-medium">Filter by role:</label>
+
+                    <select
+                        value={roleFilter}
+                        onChange={(e) => setRoleFilter(e.target.value as UserRole | "all")}
+                        className="border rounded-lg px-3 py-2 text-sm"
+                    >
+                        <option value="all">All</option>
+                        <option value="admin">Admin</option>
+                        <option value="staff">Staff</option>
+                        <option value="customer">Customer</option>
+                    </select>
+                </div>
+
             </div>
 
-            <div className="rounded-xl bg-white shadow">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-lg border border-gray-100">
                 <table className="w-full text-sm">
-                    <thead className="bg-gray-100">
+
+                    <thead className="bg-gradient-to-r from-gray-50 to-gray-100 text-gray-700 uppercase text-xs tracking-wider">
                         <tr>
-                            <th className="px-4 py-3">Name</th>
-                            <th className="px-4 py-3">Email</th>
-                            <th className="px-4 py-3">Role</th>
-                            <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3 text-right">Actions</th>
+                            <th className="px-6 py-4 text-left font-semibold">User</th>
+                            <th className="px-6 py-4 text-left font-semibold">Email</th>
+                            <th className="px-6 py-4 text-left font-semibold">Role</th>
+                            <th className="px-6 py-4 text-left font-semibold">Status</th>
+                            <th className="px-6 py-4 text-right font-semibold">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {users.map((u) => (
-                            <tr key={u.id} className="border-t">
-                                <td className="px-4 py-3">
-                                    {u.firstName} {u.lastName}
+
+                    <tbody className="divide-y divide-gray-100">
+
+                        {filteredUsers.map((u, index) => (
+
+                            <tr
+                                key={u.id}
+                                className={`
+                                    transition duration-200 hover:bg-blue-50
+                                    ${index % 2 === 0 ? "bg-white" : "bg-gray-50/40"}
+                                    `}
+                            >
+                                <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-600 font-semibold">
+                                            {u.firstName?.charAt(0)}
+                                        </div>
+                                        <div className="font-medium text-gray-800">
+                                            {u.firstName} {u.lastName}
+                                        </div>
+
+                                    </div>
                                 </td>
-                                <td className="px-4 py-3">{u.email}</td>
-                                <td className="px-4 py-3 capitalize">{u.role}</td>
-                                <td className="px-4 py-3 capitalize">{u.status}</td>
-                                <td className="px-4 py-3 text-right space-x-3">
-                                    <button
-                                        onClick={() => setEditingUser(u)}
-                                        className="text-blue-600 hover:underline"
+
+                                <td className="px-6 py-4 text-gray-600">
+                                    {u.email}
+                                </td>
+
+                                <td className="px-6 py-4">
+                                    <span
+                                        className={`px-3 py-1 text-xs font-medium rounded-full capitalize
+                                            ${u.role === "admin"
+                                                ? "bg-purple-100 text-purple-700"
+                                                : u.role === "staff"
+                                                    ? "bg-blue-100 text-blue-700"
+                                                    : "bg-gray-100 text-gray-700"
+                                            }
+                                        `}
                                     >
-                                        Edit
-                                    </button>
+                                        {u.role}
+                                    </span>
+                                </td>
+
+                                <td className="px-6 py-4">
+                                    <span
+                                        className={`px-3 py-1 text-xs font-medium rounded-full capitalize
+                                            ${u.status === "active"
+                                                ? "bg-green-100 text-green-700"
+                                                : u.status === "blocked"
+                                                    ? "bg-red-100 text-red-700"
+                                                    : "bg-yellow-100 text-yellow-700"
+                                            }
+`}
+                                    >
+                                        {u.status}
+                                    </span>
+                                </td>
+
+                                <td className="px-6 py-4 text-right">
 
                                     <button
-                                        onClick={() => setSelectedUser(u)}
-                                        className="text-green-600 hover:underline"
+                                        onClick={() => setEditingUser(u)}
+                                        className="px-4 py-1.5
+                                                    rounded-lg
+                                                    bg-blue-600
+                                                    text-white
+                                                    text-xs
+                                                    font-medium
+                                                    hover:bg-blue-700
+                                                    transition
+                                                    shadow-sm"
                                     >
-                                        View Orders
+                                        Edit
                                     </button>
                                 </td>
                             </tr>
@@ -181,87 +187,8 @@ const Users = () => {
                     </tbody>
                 </table>
             </div>
+
         </div>
-    );
-};
-
-
-interface UserFormProps {
-    initialData: User;
-    onCancel: () => void;
-    onSave: (user: User) => void;
-}
-
-const UserForm = ({ initialData, onCancel, onSave }: UserFormProps) => {
-    const [formData, setFormData] = useState<User>(initialData);
-
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-        const { name, value, type, checked } = e.target as HTMLInputElement;
-        setFormData({
-            ...formData,
-            [name]: type === "checkbox" ? checked : value,
-        });
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onSave({ ...formData, updatedAt: new Date().toISOString() });
-    };
-
-    return (
-        <form className="space-y-6" onSubmit={handleSubmit}>
-            <h2 className="text-xl font-semibold">User Details</h2>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <input name="firstName" placeholder="First Name" value={formData.firstName} onChange={handleChange} className="border px-4 py-2 rounded" />
-                <input name="lastName" placeholder="Last Name" value={formData.lastName} onChange={handleChange} className="border px-4 py-2 rounded" />
-                <input name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="border px-4 py-2 rounded" />
-                <input name="phone" placeholder="Phone" value={formData.phone} onChange={handleChange} className="border px-4 py-2 rounded" />
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <select name="role" value={formData.role} onChange={handleChange} className="border px-4 py-2 rounded">
-                    <option value="admin">Admin</option>
-                    <option value="staff">Staff</option>
-                    <option value="customer">Customer</option>
-                    <option value="vendor">Vendor</option>
-                </select>
-
-                <select name="status" value={formData.status} onChange={handleChange} className="border px-4 py-2 rounded">
-                    <option value="active">Active</option>
-                    <option value="blocked">Blocked</option>
-                    <option value="pending">Pending</option>
-                </select>
-            </div>
-
-            <div className="flex gap-6">
-                <label><input type="checkbox" name="emailVerified" checked={formData.emailVerified} onChange={handleChange} /> Email Verified</label>
-                <label><input type="checkbox" name="phoneVerified" checked={formData.phoneVerified} onChange={handleChange} /> Phone Verified</label>
-                <label><input type="checkbox" name="twoFactorEnabled" checked={formData.twoFactorEnabled} onChange={handleChange} /> 2FA Enabled</label>
-            </div>
-
-            <div className="flex gap-6">
-                <label><input type="checkbox" name="newsletterSubscribed" checked={formData.newsletterSubscribed} onChange={handleChange} /> Newsletter</label>
-                <label><input type="checkbox" name="marketingConsent" checked={formData.marketingConsent} onChange={handleChange} /> Marketing Consent</label>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 text-sm text-gray-600">
-                <div>Total Orders: {formData.totalOrders}</div>
-                <div>Total Spent: ₹{formData.totalSpent}</div>
-                <div>Last Login: {formData.lastLoginAt ?? "—"}</div>
-            </div>
-
-            <div className="flex justify-end gap-3">
-                <button type="button" onClick={onCancel} className="border px-4 py-2 rounded">
-                    Cancel
-                </button>
-                <button type="submit" className="bg-black text-white px-6 py-2 rounded">
-                    Save User
-                </button>
-            </div>
-        </form>
     );
 };
 

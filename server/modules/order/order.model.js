@@ -80,4 +80,11 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+OrderSchema.index({ createdAt: -1 });    
+OrderSchema.index({ paidAt: -1 });      
+OrderSchema.index({ paymentStatus: 1 });  
+OrderSchema.index({ orderStatus: 1 });    
+OrderSchema.index({ user: 1 });           
+OrderSchema.index({ total: -1 });   
+
 module.exports = mongoose.model("Order", OrderSchema);

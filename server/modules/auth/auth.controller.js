@@ -14,8 +14,8 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const cookieOptions = {
   httpOnly: true,
-  secure: true,        
-  sameSite: "none",    
+  secure: true,
+  sameSite: "none",
   // maxAge: 1000 * 60 * 60 * 24 * 7, 
 };
 
@@ -61,10 +61,10 @@ exports.me = async (req, res, next) => {
 
 exports.updateProfile = async (req, res, next) => {
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const updateData = req.body;
 
-    console.log("fetched user",userId)
+    console.log("fetched user", userId)
 
     const allowedFields = [
       "firstName",
@@ -121,6 +121,7 @@ exports.register = async (req, res, next) => {
       role,
       emailVerified: false,
       phoneVerified: false,
+      permissions: { read: false, edit: false },
     });
 
     const { password: _, ...safeUser } = user.toObject();
@@ -253,7 +254,6 @@ exports.googleAuthController = async (req, res, next) => {
     const { token } = req.body;
     if (!token) return res.status(400).json({ message: "No token provided" });
 
-    // Verify Google JWT
     const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
@@ -267,22 +267,23 @@ exports.googleAuthController = async (req, res, next) => {
 
     console.log("picture", picture);
 
-    // Check if user already exists
     let user = await User.findOne({ email });
 
     if (!user) {
-      // Create new user
       user = await User.create({
         firstName: given_name,
         lastName: family_name,
         email,
         emailVerified: true,
-        password: null, // no password for Google login
+        password: null, 
         profilePic: picture || "/default-profile.png",
+        emailVerified: true,
+        phoneVerified: false,
+        authProvider: "google",
+        permissions: { read: false, edit: false },
       });
     }
 
-    // Create access & refresh tokens
     const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.ACCESS_TOKEN_SECRET,
@@ -290,20 +291,26 @@ exports.googleAuthController = async (req, res, next) => {
     );
 
     const refreshToken = jwt.sign(
-      { id: user._id },
+      { id: user._id, role: user.role },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
     );
 
-    // Set cookies
+    await redis.set(
+      `refresh:${user._id}`,
+      refreshToken,
+      "EX",
+      7 * 24 * 60 * 60
+    );
+
     res.cookie("accessToken", accessToken, {
       ...cookieOptions,
-      maxAge: 15 * 60 * 1000, // 15 min
+      maxAge: 15 * 60 * 1000, 
     });
 
     res.cookie("refreshToken", refreshToken, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
     // Return user + accessToken
