@@ -1,18 +1,31 @@
 import { useCart } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../context/AuthContext";
 import { FaTrash } from "react-icons/fa";
 import axios from '../../utils/axios';
+import ShimmerCart from "../../components/shimmer/ShimmerCart";
+import { useState } from "react";
+import AuthModal from "../../components/models/Auth";
+import PaymentSuccess from "../../components/PaymentSuccess";
 
 const Cart = () => {
+  interface PaymentSuccessProps {
+    orderId: string;
+    items: { name: string; quantity: number; price: number }[];
+    total: number;
+    shippingAddress: string;
+  }
   const { cartItems, addToCart, removeFromCart, clearCart } = useCart();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [verifiedOrder, setVerifiedOrder] = useState<PaymentSuccessProps | null>(null);
+
   const { showToast } = useToast();
+  const { user } = useAuth();
 
   const totalPrice = cartItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-
-  console.log(cartItems)
 
   if (cartItems.length === 0) {
     return (
@@ -39,8 +52,6 @@ const Cart = () => {
         { withCredentials: true }
       );
 
-      console.log("ORDER:", order);
-
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
 
@@ -60,7 +71,7 @@ const Cart = () => {
             await axios.post(
               "/api/payment/verify-payment",
               {
-                orderId: order.orderId, 
+                orderId: order.orderId,
 
                 razorpay_payment_id: response.razorpay_payment_id,
 
@@ -71,13 +82,23 @@ const Cart = () => {
               { withCredentials: true }
             );
 
-            alert("Payment verified successfully");
+            setVerifiedOrder({
+              orderId: order.orderId,
+              items: cartItems.map(item => ({
+                name: item.title,
+                quantity: Number(item.quantity),
+                price: Number(item.price)
+              })),
+              total: totalPrice,
+              shippingAddress: "123 Main St, City, Country"
+            });
+            // clearCart();
 
           } catch (err) {
 
             console.error("VERIFY FAILED:", err);
 
-            alert("Payment verification failed");
+            showToast("Payment cancelled or failed", "error");
 
           }
         },
@@ -98,6 +119,7 @@ const Cart = () => {
       razor.open();
 
     } catch (err) {
+      showToast("Payment initiation failed", "error");
       console.error(err);
     }
   };
@@ -106,9 +128,9 @@ const Cart = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
+      {!verifiedOrder && <h1 className="text-2xl font-bold mb-6">Your Cart</h1>}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {!verifiedOrder && <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-4">
           {cartItems.map((item) => (
             <div
@@ -164,9 +186,13 @@ const Cart = () => {
             <span className="font-semibold">₹{totalPrice.toFixed(2)}</span>
           </div>
 
-          <button className="w-full bg-black text-white py-2 rounded mt-4 hover:bg-gray-800" onClick={handlePayment}>
+          {user && <button className="w-full bg-black text-white py-2 rounded mt-4 hover:bg-gray-800" onClick={handlePayment}>
             Pay Now
-          </button>
+          </button>}
+
+          {!user && <button className="w-full bg-black text-white py-2 rounded mt-4 hover:bg-gray-800" onClick={() => setShowAuthModal(true)}>
+            Pay Now
+          </button>}
 
           <button
             onClick={clearCart}
@@ -175,8 +201,22 @@ const Cart = () => {
             Clear Cart
           </button>
         </div>
+      </div>}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+      <div>
+        {verifiedOrder && (
+          <PaymentSuccess
+            orderId={verifiedOrder.orderId}
+            items={verifiedOrder.items}
+            total={verifiedOrder.total}
+            shippingAddress={verifiedOrder.shippingAddress}
+          />)}
       </div>
     </div>
+    // <ShimmerCart/>
   );
 };
 

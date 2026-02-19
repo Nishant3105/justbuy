@@ -6,7 +6,8 @@ import "swiper/css/navigation";
 import { useNavigate } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 import { useCart } from "../../context/CartContext";
-import { useToast } from "../../context/ToastContext"
+import { useToast } from "../../context/ToastContext";
+import ShimmerProductCard  from "../../components/shimmer/ShimmerSwiper";
 
 type Product = {
     _id: string,
@@ -30,9 +31,14 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading, category
 
     if (loading) {
         return (
-            <div>
-                <h3 className="text-xl font-semibold mb-4">{title}</h3>
-                <p className="text-gray-500">Loading products...</p>
+            <div className="p-5">
+            <div className="relative mb-4">
+                <h3 className="text-xl md:text-2xl font-semibold text-center">{title}</h3>
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 text-blue-600 hover:underline font-medium">
+                <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+                <ShimmerProductCard title="" count={8}/>
             </div>
         );
     }

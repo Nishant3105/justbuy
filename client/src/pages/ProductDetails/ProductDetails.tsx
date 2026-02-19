@@ -10,6 +10,9 @@ import { useCategoryProducts } from "../../hooks/useCategoryProducts";
 
 import "swiper/css";
 import "swiper/css/navigation";
+import Shimmer from "../../components/shimmer/Shimmer";
+import { ShimmerProductCard } from "../../components/shimmer/Skeleton";
+import ShimmerProductDetails from "../../components/shimmer/ShimmerProductDetails";
 
 const ProductDetails = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -21,7 +24,7 @@ const ProductDetails = () => {
   const { data: grocery = [], isLoading: categoryLoading } = useCategoryProducts(data?.category || '');
   const fetchedcategory = grocery.filter((prod: any)=>prod.slug !== data?.slug)
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <ShimmerProductDetails />;
   if (isError) return <div>Product not found</div>;
 
   return (

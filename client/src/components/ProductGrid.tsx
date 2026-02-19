@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Product } from "../types/Product";
+import ShimmerProductGrid from "./shimmer/ShimmerProductGrid";
 
 type Props = {
   products: Product[];
@@ -10,7 +11,7 @@ const ProductGrid: React.FC<Props> = ({ products, loading }) => {
   const navigate = useNavigate();
 
   if (loading) {
-    return <p className="text-center">Loading products...</p>;
+    return <ShimmerProductGrid count={6} />
   }
 
   if (!products.length) {
