@@ -1,77 +1,93 @@
-import { createContext, useContext, useState } from "react";
-import type { ReactNode } from "react";
 
-export type CartItem = {
-  id: string,
-  slug: string;
-  title: string;
-  image: string;
-  price: number;
-  quantity: number;
-};
+import {
+  createContext,
+  useContext,
+  ReactNode,
+} from "react";
+
+import { useCart, type CartItem } from "../hooks/useCart";
+
+type NotifyFn = (msg: string, type?: "success" | "error") => void;
 
 type CartContextType = {
   cartItems: CartItem[];
-  addToCart: (item: CartItem, notify?: (msg: string, type?: "success" | "error") => void) => void;
-  removeFromCart: (id: string, removeAll?: boolean, notify?: (msg: string, type?: "success" | "error") => void) => void;
-  clearCart: () => void;
+  isLoading: boolean;
+
+  addToCart: (item: CartItem, notify?: NotifyFn) => void;
+
+  removeFromCart: (
+    productId: string,
+    removeAll?: boolean,
+    notify?: NotifyFn
+  ) => void;
+
+  clearCart: (notify?: NotifyFn) => void;
+
+  getCartCount: () => number;
+
+  getCartTotal: () => number;
 };
 
-const CartContext = createContext<CartContextType | null>(null);
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+const CartContext = createContext<CartContextType | undefined>(
+  undefined
+);
 
-  const addToCart = (product: CartItem, notify?: CartContextType["addToCart"] extends (...args: infer P) => any ? P[1] : never) => {
-    setCartItems((prev) => {
-      const existing = prev.find((p) => p.slug === product.slug);
 
-      if (existing) {
-        notify?.("Increased product quantity");
-        return prev.map((p) =>
-          p.slug === product.slug
-            ? { ...p, quantity: p.quantity + 1 }
-            : p
-        );
-      }
+export const CartProvider = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  const {
+    cartItems,
+    isLoading,
+    addToCart,
+    removeFromCart,
+    clearCart,
+  } = useCart();
 
-      notify?.("Product added to cart");
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
 
-  const removeFromCart = (slug: string, removeAll = false, notify?: CartContextType["removeFromCart"] extends (...args: infer P) => any ? P[2] : never) => {
-    setCartItems((prev) => {
-      const item = prev.find((p) => p.slug === slug);
-      if (!item) return prev;
+  const getCartCount = () =>
+    cartItems.reduce(
+      (total: number, item: CartItem) => total + item.quantity,
+      0
+    );
 
-      if (removeAll || item.quantity === 1) {
-        notify?.("Product removed from cart", "error");
-        return prev.filter((p) => p.slug !== slug);
-      }
-
-      notify?.("Reduced product quantity", "error");
-      return prev.map((p) =>
-        p.slug === slug ? { ...p, quantity: p.quantity - 1 } : p
-      );
-    });
-  };
-
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const getCartTotal = () =>
+    cartItems.reduce(
+      (total: number, item: CartItem) =>
+        total + item.price * item.quantity,
+      0
+    );
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, clearCart }}
+      value={{
+        cartItems,
+        isLoading,
+        addToCart,
+        removeFromCart,
+        clearCart,
+        getCartCount,
+        getCartTotal,
+      }}
     >
       {children}
     </CartContext.Provider>
   );
 };
 
-export const useCart = () => {
-  const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside CartProvider");
-  return ctx;
+
+export const useCartContext = () => {
+  const context = useContext(CartContext);
+
+  if (!context) {
+    throw new Error(
+      "useCartContext must be used inside CartProvider"
+    );
+  }
+
+  return context;
 };
+

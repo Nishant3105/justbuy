@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
-import axios from "../../utils/axios"; // only needed for REGISTER
+import axios from "../../utils/axios";
+import { on } from "events";
 
 
 interface AuthModalProps {
@@ -38,7 +39,29 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
     const googleButtonRef = useRef<HTMLDivElement>(null);
 
-    // Prevent background scroll
+    useEffect(() => {
+        if (isOpen) {
+            setIsLogin(true);
+            setFormData({
+                firstName: "",
+                lastName: "",
+                phone: "",
+                email: "",
+                password: "",
+                confirmPassword: "",
+            });
+            setTouched({
+                firstName: false,
+                lastName: false,
+                phone: false,
+                email: false,
+                password: false,
+                confirmPassword: false,
+            });
+            setErrors({});
+        }
+    }, [isOpen]);
+
     useEffect(() => {
         document.body.style.overflow = isOpen ? "hidden" : "auto";
         return () => {
@@ -46,31 +69,28 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         };
     }, [isOpen]);
 
-    // Google button
     useEffect(() => {
-        if (!isOpen || !googleButtonRef.current) return;
+        if (!isOpen || !googleButtonRef.current || !window.google) return;
+
         googleButtonRef.current.innerHTML = "";
+
         window.google.accounts.id.initialize({
             client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
             callback: async (response: { credential: string }) => {
-                console.log("Google JWT:", response.credential);
-
                 try {
                     setLoading(true);
                     const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-                    // Send JWT to backend
-                    const res = await axios.post(`${VITE_API_BASE_URL}/api/auth/google`, {
-                        token: response.credential,
-                    }, { withCredentials: true }); // to store cookies
+                    const res = await axios.post(
+                        `${VITE_API_BASE_URL}/api/auth/google`,
+                        { token: response.credential },
+                        { withCredentials: true }
+                    );
 
                     const user = res.data.user;
-                    const accessToken = res.data.accessToken;
-
-                    // Login in context
                     setUser(user);
 
-                    // onClose();
+                    onClose();
                 } catch (err) {
                     console.error("Google login error:", err);
                 } finally {
@@ -78,21 +98,21 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 }
             },
         });
+
         window.google.accounts.id.renderButton(googleButtonRef.current, {
             theme: "outline",
             size: "large",
             width: 320,
         });
+
     }, [isOpen, isLogin]);
 
     if (!isOpen) return null;
 
-    // Handle input changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
 
-        // Clear error immediately if user starts typing
         setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
@@ -102,7 +122,6 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         validate();
     };
 
-    // Toggle login/signup
     const toggleForm = () => {
         setIsLogin((prev) => !prev);
         setFormData({
@@ -124,7 +143,6 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         setErrors({});
     };
 
-    // Validation
     const validate = () => {
         const newErrors: Record<string, string> = {};
 
@@ -155,13 +173,11 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             setLoading(true);
 
             if (isLogin) {
-                // 🔐 LOGIN via AuthContext
                 await login(formData.email, formData.password);
                 onClose();
                 return;
             }
 
-            // 📝 REGISTER
             await axios.post("/api/auth/register", {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
@@ -170,14 +186,11 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 password: formData.password,
             });
 
-            // ✅ Auto-login after successful register
             await login(formData.email, formData.password);
             onClose();
 
         } catch (err: any) {
             console.error(err);
-
-            // Optional: map backend errors to field-level errors
             if (err.response?.data?.message) {
                 setErrors({ email: err.response.data.message });
             }
@@ -189,7 +202,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="relative flex w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-lg">
+            <div className="relative flex w-full max-w-4xl min-h-[400px] overflow-hidden rounded-2xl bg-white shadow-lg">
                 <button
                     onClick={onClose}
                     className="absolute right-4 top-4 z-10 text-gray-500 hover:text-gray-700"
@@ -197,12 +210,10 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                     ✕
                 </button>
 
-                {/* Left banner */}
                 <div className="hidden w-1/2 md:block">
-                    <img src="/auth.jpg" alt="Auth banner" className="h-full w-full object-cover" />
+                    <img src={isLogin ? "/auth.jpg" : "/register.png"} alt={isLogin ? "Login banner" : "Signup banner"} className="h-full w-full object-cover" />
                 </div>
 
-                {/* Form */}
                 <div className="w-full md:w-1/2 p-8">
                     <h2 className="mb-6 text-center text-2xl font-semibold text-gray-900">
                         {isLogin ? "Welcome Back" : "Get Started"}
@@ -279,7 +290,6 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                             )}
                         </div>
 
-                        {/* Password with eye toggle */}
                         <div className="relative">
                             <input
                                 type={showPassword ? "text" : "password"}

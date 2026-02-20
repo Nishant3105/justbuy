@@ -12,6 +12,10 @@ router.use("/admin/analytics", require("./admin.analytics.routes"));
 router.use("/product", require("./product.routes"));
 router.use("/payment", require("./payment.routes"));
 router.use("/users", require("./user.routes"));
+router.use("/cart", require("./cart.routes"));
 
 
 module.exports = router;
+
+
+

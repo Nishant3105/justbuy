@@ -157,7 +157,9 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // ✅ ACCESS TOKEN (short-lived)
+    user.lastLoginAt = new Date();
+    await user.save();
+
     const accessToken = jwt.sign(
       {
         id: user._id,
@@ -167,17 +169,15 @@ exports.login = async (req, res, next) => {
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN }
     );
 
-    // ✅ REFRESH TOKEN (must also contain role)
     const refreshToken = jwt.sign(
       {
         id: user._id,
-        role: user.role, // 🔥 REQUIRED
+        role: user.role, 
       },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
     );
 
-    // 🔴 Store refresh token in Redis
     await redis.set(
       `refresh:${user._id}`,
       refreshToken,
@@ -185,7 +185,6 @@ exports.login = async (req, res, next) => {
       7 * 24 * 60 * 60
     );
 
-    // 🍪 Cookies
     res.cookie("accessToken", accessToken, {
       ...cookieOptions,
       maxAge: 15 * 60 * 1000,
@@ -284,6 +283,9 @@ exports.googleAuthController = async (req, res, next) => {
       });
     }
 
+    user.lastLoginAt = new Date();
+    await user.save();
+
     const accessToken = jwt.sign(
       { id: user._id, role: user.role },
       process.env.ACCESS_TOKEN_SECRET,
@@ -313,7 +315,6 @@ exports.googleAuthController = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000, 
     });
 
-    // Return user + accessToken
     const { password, ...userData } = user.toObject();
     res.json({ user: userData, accessToken });
   } catch (err) {

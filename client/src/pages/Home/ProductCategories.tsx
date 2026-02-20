@@ -5,7 +5,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import { useNavigate } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
-import { useCart } from "../../context/CartContext";
+import { useCartContext } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import ShimmerProductCard  from "../../components/shimmer/ShimmerSwiper";
 
@@ -26,7 +26,7 @@ type Props = {
 
 const ProductCategories: React.FC<Props> = ({ products, title, loading, categorySlug }) => {
     const navigate = useNavigate();
-    const { addToCart } = useCart();
+    const { addToCart } = useCartContext();
     const { showToast } = useToast();
 
     if (loading) {
@@ -88,9 +88,9 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading, category
                                     e.stopPropagation();
                                     addToCart(
                                         {
-                                            id: product._id,
+                                            productId: product._id,
+                                            name: product.title,
                                             slug: product.slug,
-                                            title: product.title,
                                             image: product.image,
                                             price: Number(product.price),
                                             quantity: 1,

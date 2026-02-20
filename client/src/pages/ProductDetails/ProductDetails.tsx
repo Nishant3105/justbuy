@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { useProductDetails } from "../../hooks/useProductDetails";
 import { Navigation } from "swiper/modules";
 import ProductGallery from "../../components/ProductGallery";
-import { useCart } from "../../context/CartContext";
+import { useCartContext } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
 import ProductCategories from "../Home/ProductCategories";
 import { useCategoryProducts } from "../../hooks/useCategoryProducts";
@@ -18,7 +18,7 @@ const ProductDetails = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, isError } = useProductDetails(slug ?? "");
   
-  const { addToCart } = useCart();
+  const { addToCart } = useCartContext();
   const { showToast } = useToast();
   
   const { data: grocery = [], isLoading: categoryLoading } = useCategoryProducts(data?.category || '');
@@ -62,9 +62,9 @@ const ProductDetails = () => {
             e.stopPropagation();
             addToCart(
               { 
-                id: data?._id ?? '',
+                productId: data?._id ?? '',
+                name: data?.name ?? '',
                 slug: data?.slug ?? '',
-                title: data?.name ?? '',
                 image: data?.mainImage ?? '',
                 price: data?.sellingPrice ?? 0,
                 quantity: 1,

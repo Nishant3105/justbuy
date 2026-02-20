@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
-import { useCart } from "../context/CartContext";
+import { useCartContext } from "../context/CartContext";
 import AuthModal from "./models/Auth";
 import { useAuth } from "../context/AuthContext";
 import NavbarSearch from "./NavbarSearch";
@@ -9,12 +9,16 @@ import NavbarSearch from "./NavbarSearch";
 const Navbar = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const { cartItems } = useCart();
+  const { cartItems } = useCartContext();
 
   const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const [openAuth, setOpenAuth] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (user) setOpenMenu(false);
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -85,7 +89,7 @@ const Navbar = () => {
                 className="flex items-center gap-2 rounded-full bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
               >
                 <img
-                  src={user?.profilePic || "/auth.jpg"} 
+                  src={user?.profilePic || "/auth.jpg"}
                   alt="Profile"
                   className="h-8 w-8 rounded-full object-cover"
                 />
@@ -97,13 +101,13 @@ const Navbar = () => {
                 <div className="absolute right-0 mt-2 w-40 rounded-md bg-white shadow-lg border border-gray-200 z-50">
                   <button
                     className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                    onClick={() => {navigate("/profile");setOpenMenu((prev) => !prev)}}
+                    onClick={() => { navigate("/profile"); setOpenMenu((prev) => !prev) }}
                   >
                     Profile
                   </button>
                   <button
                     className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                    onClick={() => {navigate("/my-orders");setOpenMenu((prev) => !prev)}}
+                    onClick={() => { navigate("/my-orders"); setOpenMenu((prev) => !prev) }}
                   >
                     My Orders
                   </button>
