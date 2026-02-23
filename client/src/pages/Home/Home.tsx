@@ -18,7 +18,7 @@ const Home = () => {
         <>
             <Banner title="Everything You Need, Delivered Fast"
                 subtitle="Discover top-quality products with exclusive deals and lightning-fast delivery."
-                backgroundImage="Banner.png" />
+                backgroundImage="https://pub-5d1c46c0377d42918cc7f96a831e3f36.r2.dev/website-assets/Banner.png" />
             <Offers />
             <div className="space-y-8">
                 <ProductCategories
