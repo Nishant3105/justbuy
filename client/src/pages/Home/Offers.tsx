@@ -14,21 +14,21 @@ const Offers = () => {
       <section className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <ImageCard
           title="Simplify Your Daily Shopping"
-          image="offer1.jpg"
+          image="https://pub-5d1c46c0377d42918cc7f96a831e3f36.r2.dev/website-assets/offer1.jpg"
           description="Get all your daily essentials delivered straight to your door – fresh, reliable, and hassle-free."
           buttonText="View"
           onClick={() => openVideo("https://www.youtube.com/embed/dQw4w9WgXcQ")}
         />
         <ImageCard
           title="Explore All Categories"
-          image="OIP.webp"
+          image="https://pub-5d1c46c0377d42918cc7f96a831e3f36.r2.dev/website-assets/offer3.webp"
           description="Discover a wide range of products across every category – from beauty and wellness to home essentials. Find everything in one place!"
           buttonText="Explore"
           onClick={() => navigate("/categories/grocery")}
         />
         <ImageCard
           title="Fresh & Organic Delivered"
-          image="offer2.jpg"
+          image="https://pub-5d1c46c0377d42918cc7f96a831e3f36.r2.dev/website-assets/offer2.jpg"
           description="Experience farm-fresh produce and natural products delivered straight to your home – healthy, tasty, and convenient."
           buttonText="View"
           onClick={() => openVideo("https://www.youtube.com/embed/dQw4w9WgXcQ")}

@@ -40,7 +40,7 @@ const Navbar = () => {
           onClick={() => navigate("/")}
         >
           <img
-            src="/applogo.png"
+            src="https://pub-5d1c46c0377d42918cc7f96a831e3f36.r2.dev/website-assets/applogo.png"
             className="h-16 w-auto object-contain transition-transform duration-500 ease-in-out group-hover:animate-spin"
             alt="JustBuy Logo"
           />

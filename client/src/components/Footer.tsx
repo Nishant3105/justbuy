@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="flex flex-col items-start">
           <div className="flex items-center gap-2 mb-3 group cursor-pointer">
             <img
-              src="/applogo.png"
+              src="https://pub-5d1c46c0377d42918cc7f96a831e3f36.r2.dev/website-assets/applogo.png"
               alt="JustBuy Logo"
               className="h-16 w-auto object-contain transition-transform duration-500 ease-in-out group-hover:animate-spin"
             />
