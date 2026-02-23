@@ -111,6 +111,12 @@ const Navbar = () => {
                   >
                     My Orders
                   </button>
+                  {(user.role === "admin" || user.role === "staff") && <button
+                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
+                    onClick={() => { navigate("/admin"); setOpenMenu((prev) => !prev) }}
+                  >
+                    Admin Panel
+                  </button>}
                   <button
                     className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
                     onClick={logout}

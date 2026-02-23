@@ -1,16 +1,44 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "../../utils/axios";
-import { on } from "events";
-
 
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
 
+type FormFields =
+    | "firstName"
+    | "lastName"
+    | "phone"
+    | "email"
+    | "password"
+    | "confirmPassword";
+
+const nameFields: FormFields[] = ["firstName", "lastName"];
+
+const initialTouched: Record<FormFields, boolean> = {
+    firstName: false,
+    lastName: false,
+    phone: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+};
+
+const initialErrors: Record<FormFields, string> = {
+    firstName: "",
+    lastName: "",
+    phone: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+};
+
 const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
     const [isLogin, setIsLogin] = useState(true);
+
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -20,24 +48,20 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         confirmPassword: "",
     });
 
-    const [touched, setTouched] = useState({
-        firstName: false,
-        lastName: false,
-        phone: false,
-        email: false,
-        password: false,
-        confirmPassword: false,
-    });
+    const [touched, setTouched] =
+        useState<Record<FormFields, boolean>>(initialTouched);
 
-    const { login, setUser } = useAuth();
 
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(false);
 
+    const [errors, setErrors] =
+        useState<Record<FormFields, string>>(initialErrors);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const googleButtonRef = useRef<HTMLDivElement>(null);
+
+    const { login, loginLoading } = useAuth();
+    const queryClient = useQueryClient();
 
     useEffect(() => {
         if (isOpen) {
@@ -50,17 +74,11 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 password: "",
                 confirmPassword: "",
             });
-            setTouched({
-                firstName: false,
-                lastName: false,
-                phone: false,
-                email: false,
-                password: false,
-                confirmPassword: false,
-            });
-            setErrors({});
+            setTouched(initialTouched);
+            setErrors(initialErrors);
         }
     }, [isOpen]);
+
 
     useEffect(() => {
         document.body.style.overflow = isOpen ? "hidden" : "auto";
@@ -68,6 +86,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             document.body.style.overflow = "auto";
         };
     }, [isOpen]);
+
 
     useEffect(() => {
         if (!isOpen || !googleButtonRef.current || !window.google) return;
@@ -78,23 +97,16 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
             callback: async (response: { credential: string }) => {
                 try {
-                    setLoading(true);
-                    const VITE_API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
                     const res = await axios.post(
-                        `${VITE_API_BASE_URL}/api/auth/google`,
+                        "/api/auth/google",
                         { token: response.credential },
                         { withCredentials: true }
                     );
 
-                    const user = res.data.user;
-                    setUser(user);
-
+                    queryClient.setQueryData(["authUser"], res.data.user);
                     onClose();
                 } catch (err) {
                     console.error("Google login error:", err);
-                } finally {
-                    setLoading(false);
                 }
             },
         });
@@ -104,17 +116,28 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             size: "large",
             width: 320,
         });
-
-    }, [isOpen, isLogin]);
+    }, [isOpen, isLogin, queryClient, onClose]);
 
     if (!isOpen) return null;
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
 
-        setErrors((prev) => ({ ...prev, [name]: "" }));
-    };
+    const handleChange =
+        (field: FormFields) =>
+            (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value;
+
+                console.log(field, value);
+
+                setFormData((prev) => ({
+                    ...prev,
+                    [field]: value,
+                }));
+
+                setErrors((prev) => ({
+                    ...prev,
+                    [field]: "",
+                }));
+            };
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
         const { name } = e.target;
@@ -140,28 +163,43 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
             password: false,
             confirmPassword: false,
         });
-        setErrors({});
+        setErrors(initialErrors);
     };
 
     const validate = () => {
-        const newErrors: Record<string, string> = {};
+        const newErrors: Partial<Record<FormFields, string>> = {};
 
-        if (!formData.email.trim()) newErrors.email = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Please enter a valid email";
+        if (!formData.email.trim())
+            newErrors.email = "Email is required";
+        else if (!/\S+@\S+\.\S+/.test(formData.email))
+            newErrors.email = "Please enter a valid email";
 
-        if (!formData.password) newErrors.password = "Password is required";
-        else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
+        if (!formData.password)
+            newErrors.password = "Password is required";
+        else if (formData.password.length < 6)
+            newErrors.password = "Password must be at least 6 characters";
 
         if (!isLogin) {
-            if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
-            if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
-            if (!formData.phone.trim()) newErrors.phone = "Mobile number is required";
-            if (!formData.confirmPassword) newErrors.confirmPassword = "Confirm password is required";
+            if (!formData.firstName.trim())
+                newErrors.firstName = "First name is required";
+
+            if (!formData.lastName.trim())
+                newErrors.lastName = "Last name is required";
+
+            if (!formData.phone.trim())
+                newErrors.phone = "Mobile number is required";
+
+            if (!formData.confirmPassword)
+                newErrors.confirmPassword = "Confirm password is required";
             else if (formData.password !== formData.confirmPassword)
                 newErrors.confirmPassword = "Passwords do not match";
         }
 
-        setErrors(newErrors);
+        setErrors({
+            ...initialErrors,
+            ...newErrors,
+        });
+
         return Object.keys(newErrors).length === 0;
     };
 
@@ -170,8 +208,6 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
         if (!validate()) return;
 
         try {
-            setLoading(true);
-
             if (isLogin) {
                 await login(formData.email, formData.password);
                 onClose();
@@ -188,21 +224,20 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
             await login(formData.email, formData.password);
             onClose();
-
         } catch (err: any) {
-            console.error(err);
             if (err.response?.data?.message) {
-                setErrors({ email: err.response.data.message });
+                setErrors({
+                    ...initialErrors,
+                    email: err.response.data.message,
+                });
             }
-        } finally {
-            setLoading(false);
         }
     };
 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-            <div className="relative flex w-full max-w-4xl min-h-[400px] overflow-hidden rounded-2xl bg-white shadow-lg">
+            <div className="relative flex w-full max-w-4xl min-h-[400px] rounded-2xl bg-white shadow-lg">
                 <button
                     onClick={onClose}
                     className="absolute right-4 top-4 z-10 text-gray-500 hover:text-gray-700"
@@ -211,7 +246,11 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                 </button>
 
                 <div className="hidden w-1/2 md:block">
-                    <img src={isLogin ? "/auth.jpg" : "/register.png"} alt={isLogin ? "Login banner" : "Signup banner"} className="h-full w-full object-cover" />
+                    <img
+                        src={isLogin ? "/auth.jpg" : "/register.png"}
+                        alt="Auth banner"
+                        className="h-full w-full object-cover"
+                    />
                 </div>
 
                 <div className="w-full md:w-1/2 p-8">
@@ -222,37 +261,27 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                     <form className="space-y-4" onSubmit={handleSubmit}>
                         {!isLogin && (
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder="First Name"
-                                        name="firstName"
-                                        value={formData.firstName}
-                                        onChange={handleChange}
-                                        onBlur={handleBlur}
-                                        className={`w-full rounded-lg border px-4 py-2 text-gray-900 ${errors.firstName ? "border-red-500" : ""
-                                            }`}
-                                    />
-                                    {errors.firstName && touched.firstName && (
-                                        <p className="mt-1 text-sm text-red-500">{errors.firstName}</p>
-                                    )}
-                                </div>
+                                {nameFields.map((field) => (
+                                    <div key={field}>
+                                        <input
+                                            type="text"
+                                            placeholder={field === "firstName" ? "First Name" : "Last Name"}
+                                            value={formData[field]}
+                                            onChange={handleChange(field)}
+                                            onBlur={() =>
+                                                setTouched((prev) => ({ ...prev, [field]: true }))
+                                            }
+                                            className={`w-full rounded-lg border px-4 py-2 text-gray-900 bg-white ${errors[field] ? "border-red-500" : ""
+                                                }`}
+                                        />
 
-                                <div>
-                                    <input
-                                        type="text"
-                                        placeholder="Last Name"
-                                        name="lastName"
-                                        value={formData.lastName}
-                                        onChange={handleChange}
-                                        onBlur={handleBlur}
-                                        className={`w-full rounded-lg border px-4 py-2 text-gray-900 ${errors.lastName ? "border-red-500" : ""
-                                            }`}
-                                    />
-                                    {errors.lastName && touched.lastName && (
-                                        <p className="mt-1 text-sm text-red-500">{errors.lastName}</p>
-                                    )}
-                                </div>
+                                        {errors[field] && touched[field] && (
+                                            <p className="mt-1 text-sm text-red-500">
+                                                {errors[field]}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
                             </div>
                         )}
 
@@ -263,9 +292,9 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                                     placeholder="Mobile Number"
                                     name="phone"
                                     value={formData.phone}
-                                    onChange={handleChange}
+                                    onChange={handleChange("phone")}
                                     onBlur={handleBlur}
-                                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 ${errors.phone ? "border-red-500" : ""
+                                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 bg-white ${errors.phone ? "border-red-500" : ""
                                         }`}
                                 />
                                 {errors.phone && touched.phone && (
@@ -280,9 +309,9 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                                 placeholder="Email"
                                 name="email"
                                 value={formData.email}
-                                onChange={handleChange}
+                                onChange={handleChange("email")}
                                 onBlur={handleBlur}
-                                className={`w-full rounded-lg border px-4 py-2 text-gray-900 ${errors.email ? "border-red-500" : ""
+                                className={`w-full rounded-lg border px-4 py-2 text-gray-900 bg-white ${errors.email ? "border-red-500" : ""
                                     }`}
                             />
                             {errors.email && touched.email && (
@@ -296,20 +325,22 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                                 placeholder="Password"
                                 name="password"
                                 value={formData.password}
-                                onChange={handleChange}
+                                onChange={handleChange("password")}
                                 onBlur={handleBlur}
-                                className={`w-full rounded-lg border px-4 py-2 text-gray-900 ${errors.password ? "border-red-500" : ""
+                                className={`w-full rounded-lg border px-4 py-2 pr-12 text-gray-900 bg-white text-base ${errors.password ? "border-red-500" : ""
                                     }`}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword((prev) => !prev)}
-                                className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                             >
                                 {showPassword ? "🙈" : "👁️"}
                             </button>
                             {errors.password && touched.password && (
-                                <p className="mt-1 text-sm text-red-500">{errors.password}</p>
+                                <p className="mt-1 text-sm text-red-500">
+                                    {errors.password}
+                                </p>
                             )}
                         </div>
 
@@ -320,39 +351,40 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                                     placeholder="Confirm Password"
                                     name="confirmPassword"
                                     value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    onBlur={handleBlur}
-                                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 ${errors.confirmPassword ? "border-red-500" : ""
+                                    onChange={handleChange("confirmPassword")}
+                                    className={`w-full rounded-lg border px-4 py-2 pr-12 text-gray-900 bg-white text-base ${errors.confirmPassword ? "border-red-500" : ""
                                         }`}
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                                    className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                                    onClick={() =>
+                                        setShowConfirmPassword((prev) => !prev)
+                                    }
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                                 >
                                     {showConfirmPassword ? "🙈" : "👁️"}
                                 </button>
-                                {errors.confirmPassword && touched.confirmPassword && (
-                                    <p className="mt-1 text-sm text-red-500">{errors.confirmPassword}</p>
-                                )}
+                                {errors.confirmPassword &&
+                                    touched.confirmPassword && (
+                                        <p className="mt-1 text-sm text-red-500">
+                                            {errors.confirmPassword}
+                                        </p>
+                                    )}
                             </div>
                         )}
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loginLoading}
                             className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-60"
                         >
-                            {loading ? "Please wait..." : isLogin ? "Login" : "Sign Up"}
+                            {loginLoading
+                                ? "Please wait..."
+                                : isLogin
+                                    ? "Login"
+                                    : "Sign Up"}
                         </button>
                     </form>
-
-                    <p className="mt-4 text-center text-sm text-gray-600">
-                        {isLogin ? "Don't have an account?" : "Already have an account?"}
-                        <button onClick={toggleForm} className="ml-1 font-medium text-blue-600 hover:underline">
-                            {isLogin ? "Sign up" : "Login"}
-                        </button>
-                    </p>
 
                     {isLogin && (
                         <>
@@ -364,6 +396,31 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
                             <div ref={googleButtonRef} className="flex justify-center" />
                         </>
                     )}
+                    <div className="mt-6 text-center text-gray-500 text-sm">
+                        {isLogin ? (
+                            <>
+                                Don’t have an account?{" "}
+                                <button
+                                    type="button"
+                                    onClick={toggleForm}
+                                    className="font-medium text-blue-600 hover:underline"
+                                >
+                                    Sign Up
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                Already have an account?{" "}
+                                <button
+                                    type="button"
+                                    onClick={toggleForm}
+                                    className="font-medium text-blue-600 hover:underline"
+                                >
+                                    Login
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -38,43 +38,43 @@ const ProfileForm = ({ onCancel }: ProfileFormProps) => {
     if (user) setFormData(user);
   }, [user]);
 
-const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-  if (!formData) return;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (!formData) return;
 
-  const target = e.target as HTMLInputElement; 
-  const { name, value, type, checked } = target;
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
 
-  setFormData({
-    ...formData,
-    [name]: type === "checkbox" ? checked : value,
-  });
-};
-
-
-const handleAddressChange = (
-  idx: number,
-  e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-) => {
-  if (!formData) return;
-
-  const target = e.target;
-  const name = target.name;
-
-  let value: string | boolean;
-  if (target instanceof HTMLInputElement && target.type === "checkbox") {
-    value = target.checked;
-  } else {
-    value = target.value;
-  }
-
-  const addresses = [...formData.addresses];
-  addresses[idx] = {
-    ...addresses[idx],
-    [name]: value,
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
   };
 
-  setFormData({ ...formData, addresses });
-};
+
+  const handleAddressChange = (
+    idx: number,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    if (!formData) return;
+
+    const target = e.target;
+    const name = target.name;
+
+    let value: string | boolean;
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      value = target.checked;
+    } else {
+      value = target.value;
+    }
+
+    const addresses = [...formData.addresses];
+    addresses[idx] = {
+      ...addresses[idx],
+      [name]: value,
+    };
+
+    setFormData({ ...formData, addresses });
+  };
 
 
   const addAddress = () => {
@@ -153,8 +153,8 @@ const handleAddressChange = (
               type="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              className="rounded-lg border px-4 py-2"
+              disabled
+              className="rounded-lg border px-4 py-2 bg-gray-100 cursor-not-allowed"
               required
             />
           </div>

@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import MainLayout from '../layouts/Mainlayout'
 import Home from '../pages/Home/Home'
 import About from '../pages/About/About'
@@ -14,6 +14,7 @@ import MyOrders from '../pages/Order/MyOrders'
 
 const AppRoutes = () => {
   const { user, loading  } = useAuth();
+  const navigate= useNavigate();
   return (
     <Routes>
       <Route element={<MainLayout />}>
@@ -29,7 +30,7 @@ const AppRoutes = () => {
             !loading ? ( 
               user ? (
                 <ProfileForm
-                  onCancel={() => console.log("Cancelled")}
+                  onCancel={() => navigate("/")}
                 />
               ) : (
                 <Navigate to="/login" replace />

@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import axios from "../utils/axios"; 
+import { createContext, useContext, ReactNode } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "../utils/axios";
 
 export interface User {
   _id: string;
@@ -17,44 +18,87 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+
   login: (email: string, password: string) => Promise<void>;
+  loginLoading: boolean;
+  loginError: string | null;
+
   logout: () => Promise<void>;
-  setUser: (user: User | null) => void;
+  logoutLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const queryClient = useQueryClient();
+  const {
+    data: user,
+    isLoading,
+  } = useQuery<User | null>({
+    queryKey: ["authUser"],
+    queryFn: async () => {
       try {
-        const res = await axios.get("/api/auth/me", { withCredentials: true });
-        setUser(res.data.user);
+        const res = await axios.get("/api/auth/me", {
+          withCredentials: true,
+        });
+        return res.data.user;
       } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
+        return null;
       }
-    };
+    },
+    retry: false,
+  });
 
-    fetchUser();
-  }, []);
+  const loginMutation = useMutation({
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
+      const res = await axios.post(
+        "/api/auth/login",
+        { email, password },
+        { withCredentials: true }
+      );
+      return res.data.user;
+    },
+    onSuccess: (data) => {
+      queryClient.setQueryData(["authUser"], data);
+    },
+  });
 
-  const login = async (email: string, password: string) => {
-    const res = await axios.post("/api/auth/login", { email, password }, { withCredentials: true });
-    setUser(res.data.user);
-  };
-
-  const logout = async () => {
-    await axios.get("/api/auth/logout", { withCredentials: true });
-    setUser(null);
-  };
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await axios.get("/api/auth/logout", {
+        withCredentials: true,
+      });
+    },
+    onSuccess: () => {
+      queryClient.setQueryData(["authUser"], null);
+    },
+  });
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, setUser }}>
+    <AuthContext.Provider
+      value={{
+        user: user ?? null,
+        loading: isLoading,
+
+        login: async (email: string, password: string) => {
+          await loginMutation.mutateAsync({ email, password });
+        },
+        loginLoading: loginMutation.isPending,
+        loginError:
+          (loginMutation.error as any)?.response?.data?.message || null,
+
+        logout: async () => {
+          await logoutMutation.mutateAsync();
+        },
+        logoutLoading: logoutMutation.isPending,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -62,6 +106,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
   return ctx;
 };

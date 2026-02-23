@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "../context/AuthContext";
 import axios from "../utils/axios";
 
 export type CartItem = {
@@ -14,17 +15,19 @@ type NotifyFn = (msg: string, type: "success" | "error") => void;
 
 export const useCart = () => {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const {
     data,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["cart"],
+    queryKey: ["cart", user?._id],
     queryFn: async () => {
       const { data } = await axios.get("/api/cart",{withCredentials: true});
       return data;
     },
+      enabled: !!user,
      select: (data) => ({
       cartItems: data.cart.map((item: any) => ({
         productId: item.product,

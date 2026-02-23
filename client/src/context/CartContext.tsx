@@ -3,9 +3,12 @@ import {
   createContext,
   useContext,
   ReactNode,
+  useEffect
 } from "react";
 
 import { useCart, type CartItem } from "../hooks/useCart";
+import { useAuth } from "../context/AuthContext";
+
 
 type NotifyFn = (msg: string, type?: "success" | "error") => void;
 
@@ -46,6 +49,14 @@ export const CartProvider = ({
     removeFromCart,
     clearCart,
   } = useCart();
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      clearCart(); 
+    }
+  }, [user]);
 
 
   const getCartCount = () =>

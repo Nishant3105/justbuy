@@ -64,17 +64,20 @@ exports.updateProfile = async (req, res, next) => {
     const userId = req.user.id;
     const updateData = req.body;
 
-    console.log("fetched user", userId)
-
     const allowedFields = [
       "firstName",
       "lastName",
-      "email",
       "phone",
       "addresses",
       "newsletterSubscribed",
       "marketingConsent",
     ];
+
+    if (updateData.email) {
+      return res.status(400).json({
+        message: "Email address cannot be changed.",
+      });
+    }
 
     const filteredData = {};
     allowedFields.forEach((field) => {
