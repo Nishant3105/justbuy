@@ -10,14 +10,18 @@ import { useCategoryProducts } from "../../hooks/useCategoryProducts";
 import "swiper/css";
 import "swiper/css/navigation";
 import ShimmerProductDetails from "../../components/shimmer/ShimmerProductDetails";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AuthModal from "../../components/models/Auth";
 import { FaCartPlus } from "react-icons/fa";
 
 const ProductDetails = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data, isLoading, isError } = useProductDetails(slug ?? "");
+  useEffect(() => {
+    setShowAll(false);
+  }, [slug]);
   const [openAuth, setOpenAuth] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   const { addToCart } = useCartContext();
   const { showToast } = useToast();
@@ -28,6 +32,17 @@ const ProductDetails = () => {
 
   if (isLoading) return <ShimmerProductDetails />;
   if (isError) return <div>Product not found</div>;
+
+  if (!data?.description) return null;
+
+  const regex = /<h3>(.*?)<\/h3>\s*<p>(.*?)<\/p>/g;
+  const details: { title: string; value: string }[] = [];
+  let match;
+  while ((match = regex.exec(data?.description)) !== null) {
+    details.push({ title: match[1], value: match[2] });
+  }
+
+  const visibleDetails = showAll ? details : details.slice(0, 4);
 
   return (
     <>
@@ -45,7 +60,7 @@ const ProductDetails = () => {
             <h1 className="text-3xl font-semibold">{data?.name}</h1>
 
             <button
-              className="ml-4 px-3 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition flex items-center gap-1"
+              className="ml-4 inline-flex items-center gap-2 bg-black text-white rounded-lg px-3 py-2 hover:bg-gray-800 transition whitespace-nowrap"
               onClick={(e) => {
                 e.stopPropagation();
                 if (user) {
@@ -64,10 +79,9 @@ const ProductDetails = () => {
                   setOpenAuth(true);
                 }
               }}
-              aria-label="Add to cart"
             >
               <FaCartPlus size={16} />
-              <span className="hidden sm:inline">Add to Cart</span>
+              <span>Add to Cart</span>
             </button>
           </div>
 
@@ -75,7 +89,24 @@ const ProductDetails = () => {
             ₹{data?.sellingPrice}
           </p>
 
-          <p className="mt-4 text-gray-600">{data?.description}</p>
+          {/* <p className="mt-4 text-gray-600">{data?.description?.replace(/<[^>]+>/g, "")}</p> */}
+          <div className="mt-6 space-y-3">
+            {visibleDetails.map((item, index) => (
+              <div key={index} className="flex flex-col">
+                <span className="font-semibold">{item.title}</span>
+                <span className="text-gray-600">{item.value}</span>
+              </div>
+            ))}
+
+            {details.length > 4 && (
+              <button
+                onClick={() => setShowAll((prev) => !prev)}
+                className="mt-2 text-blue-600 hover:underline font-medium"
+              >
+                {showAll ? "View Less" : "View More"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <div className="space-y-8">
