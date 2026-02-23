@@ -7,7 +7,10 @@ import { useNavigate } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 import { useCartContext } from "../../context/CartContext";
 import { useToast } from "../../context/ToastContext";
-import ShimmerProductCard  from "../../components/shimmer/ShimmerSwiper";
+import { useAuth } from "../../context/AuthContext";
+import ShimmerProductCard from "../../components/shimmer/ShimmerSwiper";
+import AuthModal from "../../components/models/Auth";
+import { useState } from "react";
 
 type Product = {
     _id: string,
@@ -28,17 +31,19 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading, category
     const navigate = useNavigate();
     const { addToCart } = useCartContext();
     const { showToast } = useToast();
+    const { user } = useAuth();
+    const [openAuth, setOpenAuth] = useState(false);
 
     if (loading) {
         return (
             <div className="p-5">
-            <div className="relative mb-4">
-                <h3 className="text-xl md:text-2xl font-semibold text-center">{title}</h3>
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 text-blue-600 hover:underline font-medium">
-                <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                <div className="relative mb-4">
+                    <h3 className="text-xl md:text-2xl font-semibold text-center">{title}</h3>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 text-blue-600 hover:underline font-medium">
+                        <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                    </div>
                 </div>
-            </div>
-                <ShimmerProductCard title="" count={8}/>
+                <ShimmerProductCard title="" count={8} />
             </div>
         );
     }
@@ -86,17 +91,21 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading, category
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    addToCart(
-                                        {
-                                            productId: product._id,
-                                            name: product.title,
-                                            slug: product.slug,
-                                            image: product.image,
-                                            price: Number(product.price),
-                                            quantity: 1,
-                                        },
-                                        showToast
-                                    );
+                                    if (user) {
+                                        addToCart(
+                                            {
+                                                productId: product._id,
+                                                name: product?.title,
+                                                slug: product.slug,
+                                                image: product?.image,
+                                                price: product?.price,
+                                                quantity: 1,
+                                            },
+                                            showToast
+                                        );
+                                    } else {
+                                        setOpenAuth(true);
+                                    }
                                 }}
                                 className="absolute top-3 right-3 bg-white p-2 rounded-full shadow hover:bg-black hover:text-white transition opacity-0 group-hover:opacity-100"
                                 aria-label="Add to cart"
@@ -114,6 +123,7 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading, category
                     </SwiperSlide>
                 ))}
             </Swiper>
+            <AuthModal isOpen={openAuth} onClose={() => setOpenAuth(false)} />
         </div>
     );
 };
