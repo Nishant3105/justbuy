@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import Banner from '../../components/Banner'
 import Offers from './Offers'
 import ProductCategories from './ProductCategories'
@@ -106,6 +105,15 @@ const Home = () => {
                     }
                     loading={fruitsnvegetables.isLoading}
                 />
+
+                {/* <div className="my-32">
+                  <Banner title=""
+                    subtitle=""
+                    backgroundImage="homebanner.jpg" 
+                    leftImage="Group76842.png"
+                    height="350px" />
+                </div> */}
+                
                 <ProductCategories
                     title="Meat and Seafood"
                     categorySlug="meat-and-seafood"

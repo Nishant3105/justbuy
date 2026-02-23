@@ -247,7 +247,7 @@ const AuthModal = ({ isOpen, onClose }: AuthModalProps) => {
 
                 <div className="hidden w-1/2 md:block">
                     <img
-                        src={isLogin ? "/auth.jpg" : "/register.png"}
+                        src={isLogin ? "/login2.webp" : "/register1.webp"}
                         alt="Auth banner"
                         className="h-full w-full object-cover"
                     />

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useDebounce } from "../hooks/useDebounce";
+import { FaSearch } from "react-icons/fa";
 import { useLiveSearch } from "../hooks/useLiveSearch";
 
 export default function NavbarSearch() {
@@ -11,6 +12,18 @@ export default function NavbarSearch() {
   const boxRef = useRef<HTMLDivElement>(null);
 
   const { data, isFetching } = useLiveSearch(debounced);
+
+  const phrases = ["Search products…", "Search by brand…", "Search by category…"];
+  const [placeholder, setPlaceholder] = useState(phrases[0]);
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % phrases.length);
+      setPlaceholder(phrases[index]);
+    }, 2000); 
+    return () => clearInterval(interval);
+  }, [index]);
 
   useEffect(() => {
     setOpen(false);
@@ -33,41 +46,41 @@ export default function NavbarSearch() {
 
   return (
     <div ref={boxRef} className="relative w-full max-w-md">
-      <input
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setOpen(true);
-        }}
-        onFocus={() => setOpen(true)}
-        placeholder="Search products…"
-        className="
-      w-full h-10 px-4
-      border border-gray-300
-      rounded-lg
-      bg-white text-gray-900
-      outline-none
-      focus:ring-2 focus:ring-blue-500
-      transition-all duration-300 ease-in-out
-      focus:shadow-lg
-    "
-        onKeyDown={e => {
-          if (e.key === "Enter") {
-            navigate(`/search?q=${query}`);
-            setOpen(false);
-          }
-        }}
-      />
+    <input
+      value={query}
+      onChange={(e) => {
+        setQuery(e.target.value);
+        setOpen(true);
+      }}
+      onFocus={() => setOpen(true)}
+      placeholder={placeholder}
+      className="w-full h-10 px-4
+                 border border-gray-300
+                 rounded-lg
+                 bg-white text-gray-900
+                 outline-none
+                 focus:ring-2 focus:ring-blue-500
+                 transition-all duration-300 ease-in-out
+                 focus:shadow-lg"
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          navigate(`/search?q=${query}`);
+          setOpen(false);
+        }
+      }}
+    />
+
+    <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
 
       <div
         className={`
-      absolute top-full mt-2 w-full bg-white shadow-lg rounded-lg z-50
-      transform transition-all duration-200 ease-out origin-top
-      ${open && query.length >= 2
-            ? "opacity-100 scale-y-100 translate-y-0"
-            : "opacity-0 scale-y-95 -translate-y-2 pointer-events-none"
+          absolute top-full mt-2 w-full bg-white shadow-lg rounded-lg z-50
+          transform transition-all duration-200 ease-out origin-top
+          ${open && query.length >= 2
+                ? "opacity-100 scale-y-100 translate-y-0"
+                : "opacity-0 scale-y-95 -translate-y-2 pointer-events-none"
           }
-    `}
+        `}
       >
 
         {isFetching && (

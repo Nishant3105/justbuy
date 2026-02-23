@@ -69,7 +69,7 @@ const ProductGrid: React.FC<Props> = ({ products, loading }) => {
           </button>
 
           <div className="p-4 cursor-pointer" onClick={() => navigate(`/product/${product.slug}`)}>
-            <h3 className="font-semibold text-sm md:text-base">{product.name}</h3>
+            <h3 className="font-semibold text-sm md:text-base truncate">{product.name}</h3>
             <p className="text-green-600 font-bold mt-1">₹{product.sellingPrice}</p>
           </div>
         </div>

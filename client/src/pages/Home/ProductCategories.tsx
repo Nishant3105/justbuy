@@ -114,7 +114,7 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading, category
                             </button>
 
                             <div className="p-3">
-                                <h3 className="font-semibold text-sm">{product.title}</h3>
+                                <h3 className="font-semibold text-sm truncate">{product.title}</h3>
                                 <p className="text-green-600 font-bold mt-1">
                                     ₹{product.price}
                                 </p>

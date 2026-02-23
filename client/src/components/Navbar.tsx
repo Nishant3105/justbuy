@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
+import { LogIn } from "lucide-react";
 import { useCartContext } from "../context/CartContext";
 import AuthModal from "./models/Auth";
 import { useAuth } from "../context/AuthContext";
@@ -32,10 +33,18 @@ const Navbar = () => {
 
   return (
     <header className="bg-gray-800 text-white w-full">
-      <div className="max-w-7xl mx-auto px-4 h-16 grid grid-cols-[auto_1fr_auto] items-center gap-4">
-        <div className="flex items-center gap-2" onClick={() => navigate(`/`)}>
-          <img src="/logo.png" className="h-8" />
-          <span className="font-semibold">JustBuy</span>
+      <div className="max-w-7xl mx-auto grid grid-cols-[auto_1fr_auto] items-center gap-4 h-16 px-4">
+
+        <div
+          className="flex items-center gap-1 cursor-pointer group"
+          onClick={() => navigate("/")}
+        >
+          <img
+            src="/applogo.png"
+            className="h-16 w-auto object-contain transition-transform duration-500 ease-in-out group-hover:animate-spin"
+            alt="JustBuy Logo"
+          />
+          <span className="text-xl font-bold text-white">JustBuy</span>
         </div>
 
         <div className="flex justify-center">
@@ -44,30 +53,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          {/* <nav className="flex gap-6">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-yellow-400 font-semibold"
-                  : "hover:text-yellow-300"
-              }
-            >
-              Home
-            </NavLink>
-
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-yellow-400 font-semibold"
-                  : "hover:text-yellow-300"
-              }
-            >
-              About
-            </NavLink>
-          </nav> */}
+        <div className="flex items-center gap-4">
 
           <button
             onClick={() => navigate("/cart")}
@@ -93,51 +79,37 @@ const Navbar = () => {
                   alt="Profile"
                   className="h-8 w-8 rounded-full object-cover"
                 />
-                <span className="hidden md:inline">{user?.firstName + " " + user?.lastName}</span>
+                <span className="hidden md:inline">{user?.firstName} {user?.lastName}</span>
                 <span>{openMenu ? "▲" : "▼"}</span>
               </button>
 
               {openMenu && (
                 <div className="absolute right-0 mt-2 w-40 rounded-md bg-white shadow-lg border border-gray-200 z-50">
-                  <button
-                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                    onClick={() => { navigate("/profile"); setOpenMenu((prev) => !prev) }}
-                  >
-                    Profile
-                  </button>
-                  <button
-                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                    onClick={() => { navigate("/my-orders"); setOpenMenu((prev) => !prev) }}
-                  >
-                    My Orders
-                  </button>
-                  {(user.role === "admin" || user.role === "staff") && <button
-                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                    onClick={() => { navigate("/admin"); setOpenMenu((prev) => !prev) }}
-                  >
-                    Admin Panel
-                  </button>}
-                  <button
-                    className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
-                    onClick={logout}
-                  >
-                    Logout
-                  </button>
+                  <button className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onClick={() => { navigate("/profile"); setOpenMenu(false) }}>Profile</button>
+                  <button className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onClick={() => { navigate("/my-orders"); setOpenMenu(false) }}>My Orders</button>
+                  {(user.role === "admin" || user.role === "staff") && (
+                    <button className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onClick={() => { navigate("/admin"); setOpenMenu(false) }}>Admin Panel</button>
+                  )}
+                  <button className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100" onClick={logout}>Logout</button>
                 </div>
               )}
             </div>
           ) : (
             <button
               onClick={() => setOpenAuth(true)}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-white"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition shadow-md hover:shadow-lg group"
             >
-              Login / Signup
+              <LogIn
+                size={16}
+                className="transition-transform duration-300 ease-in-out group-hover:translate-x-1"
+              />
+              <span className="group-hover:underline transition-all">Login</span>
             </button>
           )}
 
-
           <AuthModal isOpen={openAuth} onClose={() => setOpenAuth(false)} />
         </div>
+
       </div>
     </header>
   );
