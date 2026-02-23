@@ -5,19 +5,19 @@ const Offers = () => {
       <ImageCard
         title="Daily Essentials, Made Easy"
         image="home_card_1.jpg"
-        description="These are electronics items."
+        description=""
         buttonText="Shop Now"
       />
       <ImageCard
         title="Care That Cares for You"
         image="home_card_2.jpg"
-        description="These are fashion items."
+        description=""
         buttonText="Explore"
       />
       <ImageCard
         title="Farm Fresh Every Day"
         image="home_card_4.jpg"
-        description="These are home decor items."
+        description=""
         buttonText="View"
       />
     </section>
