@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../user/user");
+const User = require("../user/user.model");
 const redis = require("../../config/redis");
 const { OAuth2Client } = require("google-auth-library");
 
@@ -48,7 +48,9 @@ exports.me = async (req, res, next) => {
       process.env.ACCESS_TOKEN_SECRET
     );
 
-    const user = await User.findById(decoded.id).select("-password");
+    const user = await User.findById(decoded.id)
+    .select("-password -createdAt -updatedAt -lastLoginAt -__v -permissions -status -authProvider -emailVerified -phoneVerified -twoFactorEnabled")
+    .lean();
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }

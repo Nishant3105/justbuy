@@ -3,7 +3,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const Order = require("../order/order.model");
 const Product = require("../product/product.model");
-const User = require("../user/user");
+const User = require("../user/user.model");
 const Cart = require("../cart/cart.model");
 
 const razorpay = new Razorpay({
