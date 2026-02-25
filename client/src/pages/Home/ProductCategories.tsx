@@ -10,7 +10,7 @@ import { useToast } from "../../context/ToastContext";
 import { useAuth } from "../../context/AuthContext";
 import ShimmerProductCard from "../../components/shimmer/ShimmerSwiper";
 import AuthModal from "../../components/models/Auth";
-import { useState } from "react";
+import { useState, memo } from "react";
 
 type Product = {
     _id: string,
@@ -27,7 +27,7 @@ type Props = {
     categorySlug?: string;
 };
 
-const ProductCategories: React.FC<Props> = ({ products, title, loading, categorySlug }) => {
+const ProductCategories: React.FC<Props> = memo(({ products, title, loading, categorySlug }) => {
     const navigate = useNavigate();
     const { addToCart } = useCartContext();
     const { showToast } = useToast();
@@ -126,6 +126,6 @@ const ProductCategories: React.FC<Props> = ({ products, title, loading, category
             <AuthModal isOpen={openAuth} onClose={() => setOpenAuth(false)} />
         </div>
     );
-};
+});
 
 export default ProductCategories;

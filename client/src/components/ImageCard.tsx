@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 type ImageCardProps = {
   title: string;
   description: string;
@@ -6,7 +8,8 @@ type ImageCardProps = {
   onClick?: () => void;
 };
 
-const ImageCard: React.FC<ImageCardProps> = ({
+
+const ImageCard: React.FC<ImageCardProps> = memo(({
   title,
   description,
   image,
@@ -43,6 +46,6 @@ const ImageCard: React.FC<ImageCardProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default ImageCard;

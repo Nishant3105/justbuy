@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaShoppingCart } from "react-icons/fa";
 import { LogIn } from "lucide-react";
@@ -12,7 +12,10 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const { cartItems } = useCartContext();
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const cartCount = useMemo(
+    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
+    [cartItems]
+  );
   const [openAuth, setOpenAuth] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -21,15 +24,16 @@ const Navbar = () => {
     if (user) setOpenMenu(false);
   }, [user]);
 
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      setOpenMenu(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpenMenu(false);
-      }
-    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [handleClickOutside]);
 
   return (
     <header className="bg-gray-800 text-white w-full">

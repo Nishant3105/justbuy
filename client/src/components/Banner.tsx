@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 type BannerProps = {
   title: string;
   subtitle?: string;
@@ -6,7 +8,7 @@ type BannerProps = {
   height?: string;
 };
 
-const Banner: React.FC<BannerProps> = ({
+const Banner: React.FC<BannerProps> = memo(({
   title,
   subtitle,
   backgroundImage,
@@ -45,6 +47,6 @@ const Banner: React.FC<BannerProps> = ({
     </section>
 
   );
-};
+});
 
 export default Banner;

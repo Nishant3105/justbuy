@@ -1,22 +1,34 @@
+import { lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import MainLayout from '../layouts/Mainlayout'
-import Home from '../pages/Home/Home'
+import MainLayout from '../layouts/Mainlayout';
+import Home from '../pages/Home/Home';
 import ProductDetails from '../pages/ProductDetails/ProductDetails'
 import Categories from '../pages/Category/Categories'
 import Cart from "../pages/Cart/Cart";
 import NotFound from '../pages/NotFound/NotFound';
-import ProfileForm from '../pages/Profile/ProfileForm'
 import { adminRoutes } from "../admin/admin.routes";
 import { useAuth } from '../context/AuthContext'
 import MyOrders from '../pages/Order/MyOrders'
-import FAQ from '../pages/Static Pages/Faqs';
-import Terms from '../pages/Static Pages/Terms';
-import Privacy from '../pages/Static Pages/Privacy';
-import Shipping from '../pages/Static Pages/Shipping';
-import About from '../pages/Static Pages/About';
-import Contact from '../pages/Static Pages/Contact';
-import Return from '../pages/Static Pages/Return';
 import ScrollToTop from '../components/ScrollToTop'
+
+const ProfileForm = lazy(() => import('../pages/Profile/ProfileForm'));
+const FAQ = lazy(() => import('../pages/Static Pages/Faqs'));
+const Terms = lazy(() => import('../pages/Static Pages/Terms'));
+const Privacy = lazy(() => import('../pages/Static Pages/Privacy'));
+const Shipping = lazy(() => import('../pages/Static Pages/Shipping'));
+const About = lazy(() => import('../pages/Static Pages/About'));
+const Contact = lazy(() => import('../pages/Static Pages/Contact'));
+const Return = lazy(() => import('../pages/Static Pages/Return'));
+
+
+const LazyLoadFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+      <p className="text-gray-600">Loading...</p>
+    </div>
+  </div>
+);
 
 
 const AppRoutes = () => {
@@ -37,28 +49,62 @@ const AppRoutes = () => {
           element={
             !loading ? (
               user ? (
-                <ProfileForm
-                  onCancel={() => navigate("/")}
-                />
+                <Suspense fallback={<LazyLoadFallback />}>
+                  <ProfileForm
+                    onCancel={() => navigate("/")}
+                  />
+                </Suspense>
               ) : (
                 <Navigate to="/login" replace />
               )
             ) : (
-              <div>Loading...</div>
+              <LazyLoadFallback />
             )
           }
         />
         <Route path="/my-orders" element={<MyOrders />} />
-        <Route path="/faq" element={<FAQ />} />
-        <Route path="/terms" element={<Terms />} />
-        <Route path="/privacy" element={<Privacy />} />
-        <Route path="/shipping" element={<Shipping />} />
-        <Route path="/returns" element={<Return />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
+        <Route path="/faq" element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            <FAQ />
+          </Suspense>
+        } />
+        <Route path="/terms" element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Terms />
+          </Suspense>
+        } />
+        <Route path="/privacy" element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Privacy />
+          </Suspense>
+        } />
+        <Route path="/shipping" element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Shipping />
+          </Suspense>
+        } />
+        <Route path="/returns" element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Return />
+          </Suspense>
+        } />
+        <Route path="/about" element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            <About />
+          </Suspense>
+        } />
+        <Route path="/contact" element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            <Contact />
+          </Suspense>
+        } />
       </Route>
       {adminRoutes.map(({ path, element }) => (
-        <Route key={path} path={path} element={element} />
+        <Route key={path} path={path} element={
+          <Suspense fallback={<LazyLoadFallback />}>
+            {element}
+          </Suspense>
+        } />
       ))}
       <Route path="*" element={<NotFound />} />
     </Routes>

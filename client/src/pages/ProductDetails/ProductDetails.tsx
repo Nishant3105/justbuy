@@ -10,7 +10,7 @@ import { useCategoryProducts } from "../../hooks/useCategoryProducts";
 import "swiper/css";
 import "swiper/css/navigation";
 import ShimmerProductDetails from "../../components/shimmer/ShimmerProductDetails";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import AuthModal from "../../components/models/Auth";
 import { FaCartPlus } from "react-icons/fa";
 
@@ -28,7 +28,11 @@ const ProductDetails = () => {
   const { user } = useAuth();
 
   const { data: grocery = [], isLoading: categoryLoading } = useCategoryProducts(data?.category || '');
-  const fetchedcategory = grocery.filter((prod: any) => prod.slug !== data?.slug)
+  
+  const fetchedcategory = useMemo(
+    () => grocery.filter((prod: any) => prod.slug !== data?.slug),
+    [grocery, data?.slug]
+  );
 
   if (isLoading) return <ShimmerProductDetails />;
   if (isError) return <div>Product not found</div>;
@@ -42,7 +46,10 @@ const ProductDetails = () => {
     details.push({ title: match[1], value: match[2] });
   }
 
-  const visibleDetails = showAll ? details : details.slice(0, 4);
+  const visibleDetails = useMemo(() => 
+    showAll ? details : details.slice(0, 4),
+    [showAll, details]
+  );
 
   return (
     <>

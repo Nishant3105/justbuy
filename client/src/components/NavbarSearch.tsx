@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDebounce } from "../hooks/useDebounce";
 import { FaSearch } from "react-icons/fa";
 import { useLiveSearch } from "../hooks/useLiveSearch";
@@ -9,39 +9,43 @@ export default function NavbarSearch() {
   const [open, setOpen] = useState(false);
   const debounced = useDebounce(query, 300);
   const navigate = useNavigate();
+  const location = useLocation();
   const boxRef = useRef<HTMLDivElement>(null);
 
   const { data, isFetching } = useLiveSearch(debounced);
 
-  const phrases = ["Search products…", "Search by brand…", "Search by category…"];
-  const [placeholder, setPlaceholder] = useState(phrases[0]);
+  const phrases = useMemo(() => [
+    "Search products…",
+    "Search by brand…",
+    "Search by category…"
+  ], []);
+
   const [index, setIndex] = useState(0);
+  const placeholder = useMemo(() => phrases[index], [index, phrases]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % phrases.length);
-      setPlaceholder(phrases[index]);
-    }, 2000); 
+    }, 2000);
     return () => clearInterval(interval);
-  }, [index]);
+  }, [phrases.length]);
 
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
 
-  useEffect(() => {
-  const handleClickOutside = (e: any) => {
-    if (boxRef.current && !boxRef.current.contains(e.target)) {
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
       setOpen(false);
     }
-  };
+  }, []);
 
-  document.addEventListener("click", handleClickOutside);
-
-  return () => {
-    document.removeEventListener("click", handleClickOutside);
-  };
-}, []);
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [handleClickOutside]);
 
 
   return (

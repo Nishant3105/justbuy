@@ -7,6 +7,7 @@ import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import { useState } from "react";
 import AuthModal from "./models/Auth";
+import React from "react";
 
 type Props = {
   products: Product[];
@@ -79,4 +80,4 @@ const ProductGrid: React.FC<Props> = ({ products, loading }) => {
   );
 };
 
-export default ProductGrid;
+export default React.memo(ProductGrid);
