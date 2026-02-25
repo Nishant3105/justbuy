@@ -28,28 +28,35 @@ const ProductDetails = () => {
   const { user } = useAuth();
 
   const { data: grocery = [], isLoading: categoryLoading } = useCategoryProducts(data?.category || '');
-  
+
   const fetchedcategory = useMemo(
     () => grocery.filter((prod: any) => prod.slug !== data?.slug),
     [grocery, data?.slug]
+  );
+
+  const details = useMemo(() => {
+    if (!data?.description) return [];
+
+    const regex = /<h3>(.*?)<\/h3>\s*<p>(.*?)<\/p>/g;
+    const extracted: { title: string; value: string }[] = [];
+    let match;
+
+    while ((match = regex.exec(data.description)) !== null) {
+      extracted.push({ title: match[1], value: match[2] });
+    }
+
+    return extracted;
+  }, [data?.description]);
+
+  const visibleDetails = useMemo(() =>
+    showAll ? details : details.slice(0, 4),
+    [showAll, details]
   );
 
   if (isLoading) return <ShimmerProductDetails />;
   if (isError) return <div>Product not found</div>;
 
   if (!data?.description) return null;
-
-  const regex = /<h3>(.*?)<\/h3>\s*<p>(.*?)<\/p>/g;
-  const details: { title: string; value: string }[] = [];
-  let match;
-  while ((match = regex.exec(data?.description)) !== null) {
-    details.push({ title: match[1], value: match[2] });
-  }
-
-  const visibleDetails = useMemo(() => 
-    showAll ? details : details.slice(0, 4),
-    [showAll, details]
-  );
 
   return (
     <>

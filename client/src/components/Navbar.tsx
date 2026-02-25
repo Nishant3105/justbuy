@@ -79,7 +79,7 @@ const Navbar = () => {
                 className="flex items-center gap-2 rounded-full bg-gray-200 px-3 py-1 text-gray-800 hover:bg-gray-300"
               >
                 <img
-                  src={user?.profilePic || "/auth.jpg"}
+                  src={user?.profilePic || "https://pub-5d1c46c0377d42918cc7f96a831e3f36.r2.dev/website-assets/profilepic.jpg"}
                   alt="Profile"
                   className="h-8 w-8 rounded-full object-cover"
                 />

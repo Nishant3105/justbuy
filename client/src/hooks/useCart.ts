@@ -72,7 +72,7 @@ export const useCart = () => {
 
   const clearMutation = useMutation({
     mutationFn: async () => {
-      const { data } = await axios.delete("/api/cart");
+      const { data } = await axios.delete("/api/cart/clear");
       return data;
     },
     onSuccess: () => {
