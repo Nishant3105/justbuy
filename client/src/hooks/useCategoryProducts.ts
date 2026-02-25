@@ -9,6 +9,10 @@ export const useCategoryProducts = (
   return useQuery<Product[]>({
     queryKey: ["products", "category", category, limit],
     queryFn: () => fetchProductsByCategory(category, limit),
-    enabled: !!category, 
+    enabled: !!category,
+    staleTime: 5 * 60 * 1000,   
+    gcTime: 30 * 60 * 1000,        
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData 
   });
 };

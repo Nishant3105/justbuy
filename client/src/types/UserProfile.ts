@@ -24,3 +24,5 @@ export interface UserProfile {
   profilePic?: string;
   role?: "admin" | "customer" | "staff";
 }
+
+export type UpdateUserProfile = Omit<UserProfile, "_id" | "email">;

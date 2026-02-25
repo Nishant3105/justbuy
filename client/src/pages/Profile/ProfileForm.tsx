@@ -111,7 +111,8 @@ const ProfileForm = ({ onCancel }: ProfileFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData) return;
-    updateProfile(formData);
+    const { _id, email, ...rest } = formData;
+    updateProfile(rest);
   };
 
   if (!formData) return <div>Loading...</div>;

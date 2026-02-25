@@ -6,9 +6,9 @@ export const useProductDetails = (slug?: string) => {
     queryKey: ["product", slug],
     queryFn: () => fetchProductBySlug(slug!),
     enabled: Boolean(slug),
-    staleTime: 0,
-    gcTime: 0,              
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
+    staleTime: 5 * 60 * 1000,      
+    gcTime: 30 * 60 * 1000,        
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
