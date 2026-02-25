@@ -10,11 +10,11 @@ const Users = () => {
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [roleFilter, setRoleFilter] = useState<UserRole | "all">("all");
 
-    const filteredUsers =
-        roleFilter === "all"
+    const filteredUsers = Array.isArray(users)
+        ? roleFilter === "all"
             ? users
-            : users.filter((u) => u.role === roleFilter);
-
+            : users.filter((u) => u.role === roleFilter)
+        : [];
 
 
     const handleSave = (user: User) => {
