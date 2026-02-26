@@ -17,16 +17,23 @@ app.set("trust proxy", 1);
 
 app.use(
   helmet({
-    crossOriginResourcePolicy: false, 
+    crossOriginResourcePolicy: false,
   })
 );
 
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 200,
-  })
-);
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      success: false,
+      message: "Too many requests. Please try again later."
+    });
+  },
+  skip: (req) => req.path === "/health", 
+});
 
 app.use(compression());
 
@@ -34,7 +41,6 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 
 app.use(cookieParser());
-
 
 const allowedOrigins = [
   "http://localhost:5173",
@@ -66,9 +72,7 @@ app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-
-app.use("/api", routes);
-
+app.use("/api", globalLimiter, routes);
 
 app.use(errorHandler);
 
