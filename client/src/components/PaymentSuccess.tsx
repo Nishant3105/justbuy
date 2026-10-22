@@ -38,7 +38,7 @@ const PaymentSuccess = ({ orderId, items, total, shippingAddress }: PaymentSucce
               </li>
             ))}
           </ul>
-          <p className="font-semibold mt-2">Total Paid: ₹{total}</p>
+          <p className="font-semibold mt-2">Total Paid: ₹{+total.toFixed(2)}</p>
         </div>
 
         <div className="flex flex-col sm:flex-row justify-center gap-4 mt-4">
