@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import MainLayout from '../layouts/Mainlayout';
 import Home from '../pages/Home/Home';
@@ -9,7 +9,8 @@ import NotFound from '../pages/NotFound/NotFound';
 import { adminRoutes } from "../admin/admin.routes";
 import { useAuth } from '../context/AuthContext'
 import MyOrders from '../pages/Order/MyOrders'
-import ScrollToTop from '../components/ScrollToTop'
+import ScrollToTop from '../components/ScrollToTop';
+
 
 const ProfileForm = lazy(() => import('../pages/Profile/ProfileForm'));
 const FAQ = lazy(() => import('../pages/Static Pages/Faqs'));
@@ -55,14 +56,31 @@ const AppRoutes = () => {
                   />
                 </Suspense>
               ) : (
-                <Navigate to="/login" replace />
+                <Navigate to="/" replace />
               )
             ) : (
               <LazyLoadFallback />
             )
           }
         />
-        <Route path="/my-orders" element={<MyOrders />} />
+        <Route
+          path="/my-orders"
+          element={
+            !loading ? (
+              user ? (
+                <Suspense fallback={<LazyLoadFallback />}>
+                  <MyOrders />
+                </Suspense>
+              ) : (
+                <>
+                <Navigate to="/" replace />
+                </>
+              )
+            ) : (
+              <LazyLoadFallback />
+            )
+          }
+        />
         <Route path="/faq" element={
           <Suspense fallback={<LazyLoadFallback />}>
             <FAQ />
