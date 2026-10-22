@@ -2,7 +2,7 @@ import SummaryCards from "../components/dashboard/SummaryCards";
 import RevenueChart from "../components/charts/RevenueChart";
 import PaymentPie from "../components/charts/PaymentPie";
 import TopProductsChart from "../components/charts/TopProductsChart";
-import RecentOrders from "../components/dashboard/RecentOrders";
+// import RecentOrders from "../components/dashboard/RecentOrders";
 import { useDashboardStats } from "../../hooks/useDashboardStats";
 
 const Dashboard = () => {
@@ -26,7 +26,7 @@ const Dashboard = () => {
 
         <TopProductsChart />
 
-        <RecentOrders />
+        {/* <RecentOrders /> */}
 
       </div>
     </div>

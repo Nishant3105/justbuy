@@ -99,6 +99,8 @@ const Navbar = () => {
               )}
             </div>
           ) : (
+            <>
+
             <button
               onClick={() => setOpenAuth(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-500 transition shadow-md hover:shadow-lg group"
@@ -109,6 +111,10 @@ const Navbar = () => {
               />
               <span className="group-hover:underline transition-all">Login</span>
             </button>
+            <button onClick={()=>navigate("/admin")}>
+              View as Admin
+            </button>
+            </>
           )}
 
           <AuthModal isOpen={openAuth} onClose={() => setOpenAuth(false)} />

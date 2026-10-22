@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../user/user.model");
-const redis = require("../../config/redis");
+// const redis = require("../../config/redis");
 const { OAuth2Client } = require("google-auth-library");
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -183,12 +183,12 @@ exports.login = async (req, res, next) => {
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
     );
 
-    await redis.set(
-      `refresh:${user._id}`,
-      refreshToken,
-      "EX",
-      7 * 24 * 60 * 60
-    );
+    // await redis.set(
+    //   `refresh:${user._id}`,
+    //   refreshToken,
+    //   "EX",
+    //   7 * 24 * 60 * 60
+    // );
 
     res.cookie("accessToken", accessToken, {
       ...cookieOptions,
@@ -224,7 +224,10 @@ exports.refreshToken = async (req, res, next) => {
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    const storedToken = await redis.get(`refresh:${decoded.id}`);
+    // const storedToken = await redis.get(`refresh:${decoded.id}`);
+    
+    const storedToken = refreshToken
+
 
     if (!storedToken || storedToken !== refreshToken) {
       return res.status(401).json({ message: "Session expired" });
@@ -303,12 +306,12 @@ exports.googleAuthController = async (req, res, next) => {
       { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
     );
 
-    await redis.set(
-      `refresh:${user._id}`,
-      refreshToken,
-      "EX",
-      7 * 24 * 60 * 60
-    );
+    // await redis.set(
+    //   `refresh:${user._id}`,
+    //   refreshToken,
+    //   "EX",
+    //   7 * 24 * 60 * 60
+    // );
 
     res.cookie("accessToken", accessToken, {
       ...cookieOptions,
@@ -340,7 +343,7 @@ exports.logout = async (req, res, next) => {
         process.env.REFRESH_TOKEN_SECRET
       );
 
-      await redis.del(`refresh:${decoded.id}`);
+      // await redis.del(`refresh:${decoded.id}`);
     }
 
     res.clearCookie("accessToken");

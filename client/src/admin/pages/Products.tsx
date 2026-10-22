@@ -113,7 +113,7 @@ const Products = () => {
           data={data?.products || []}
           loading={isLoading}
           page={page}
-          pages={data?.pages || 1}
+          pages={data?.totalPages || 1}
           sortBy={sortBy}
           order={order}
           onPageChange={setPage}

@@ -73,7 +73,7 @@ const UserOrders = () => {
                     </p>
 
                     <p className="text-sm font-medium text-gray-700">
-                      ₹{item.price}
+                      ₹{Math.round(+item.price / 100)}
                     </p>
                   </div>
                 </div>
@@ -84,7 +84,7 @@ const UserOrders = () => {
             <div className="mt-4 pt-3 border-t flex justify-between items-center">
 
               <span className="font-semibold text-lg text-gray-800">
-                Total: ₹{order.total}
+                Total: ₹{Math.round(+order.total / 100)}
               </span>
 
               <span

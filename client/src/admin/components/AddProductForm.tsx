@@ -7,7 +7,8 @@ import Italic from '@tiptap/extension-italic';
 import Link from '@tiptap/extension-link';
 import Heading from '@tiptap/extension-heading';
 import type { Product } from "../../types/Product";
-import RichTextEditor from "./RichTextEditor"
+import RichTextEditor from "./RichTextEditor";
+import { useAuth } from "../../context/AuthContext";
 
 interface AddProductFormProps {
     initialData?: Product;
@@ -69,6 +70,9 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
                 updatedAt: new Date().toISOString(),
             }
     );
+
+    const { user } = useAuth();
+    // console.log("this......",user?.role)
 
     // Text / number / select
     const generateSlug = (text: string) =>
@@ -215,7 +219,8 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
             onSave(res.data);
         } catch (err: any) {
             console.error(err);
-            alert(err?.response?.data?.message || "Failed to save product");
+            alert(`${err?.response?.data?.message} Please login as an Admin!` || "Failed to save product");
+
         }
     };
 
@@ -585,8 +590,9 @@ const AddProductForm = ({ initialData, onCancel, onSave }: AddProductFormProps) 
                     </button>
 
                     <button
+                        disabled={user?.role !== "admin"}
                         type="submit"
-                        className="rounded-lg bg-black px-6 py-2 text-white"
+                        className={user?.role !=="admin" ? `rounded-lg bg-black px-6 py-2 text-white` : `rounded-lg bg-black px-6 py-2 text-white cursor-not-allowed`}
                     >
                         Save Product
                     </button>

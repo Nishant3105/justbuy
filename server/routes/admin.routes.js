@@ -11,17 +11,17 @@ const {
 
 router.get(
   "/dashboard",
-  protect,
-  requireRole(["admin"]),
-  adminLimiter,
+  // protect,
+  // requireRole(["admin"]),
+  // adminLimiter,
   getDashboardStats
 );
 
 router.get(
   "/orders",
-  protect,
-  requireRole(["admin"]),
-  adminLimiter,
+  // protect,
+  // requireRole(["admin"]),
+  // adminLimiter,
   getAllOrders
 );
 

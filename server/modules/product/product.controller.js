@@ -358,7 +358,7 @@ exports.filter = async (req, res) => {
 
         const [products, total] = await Promise.all([
             Product.find(query)
-                .select("name slug price mainImage category sold createdAt")
+                .select("name slug mainImage sellingPrice status category sold createdAt")
                 .sort(sort)
                 .skip(skip)
                 .limit(limit)

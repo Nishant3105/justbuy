@@ -7,6 +7,7 @@ export interface ProductsResponse {
   total: number;
   page: number;
   pages: number;
+  totalPages: number;
 }
 
 export interface UseProductsParams {
